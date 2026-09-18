@@ -1,0 +1,74 @@
+{
+  "name": "hedera-agent-ops",
+  "description": "On-chain agent registry where registered agents execute DeFi actions through SaucerSwap and Bonzo, with every action recorded to an HCS topic and replayed from the mirror node as a tamper-evident audit trail.",
+  "version": "0.1.0",
+  "create-scaffold-hbar": {
+    "capabilities": {
+      "frontend": ["nextjs-app"],
+      "solidityFramework": ["foundry"],
+      "packageManager": ["yarn", "npm"]
+    },
+    "defaults": {
+      "frontend": "nextjs-app",
+      "solidityFramework": "foundry",
+      "packageManager": "yarn"
+    },
+    "requirements": {
+      "node": ">=20.18.3"
+    },
+    "envVars": [
+      {
+        "key": "HEDERA_ACCOUNT_ID",
+        "description": "Operator account that submits HCS audit receipts, e.g. 0.0.12345"
+      },
+      {
+        "key": "HEDERA_PRIVATE_KEY",
+        "description": "ECDSA private key for HEDERA_ACCOUNT_ID. Never commit a funded mainnet key."
+      },
+      {
+        "key": "NEXT_PUBLIC_HEDERA_TESTNET_RPC_URL",
+        "description": "JSON-RPC relay for Hedera testnet (chain ID 296). Defaults to https://testnet.hashio.io/api"
+      },
+      {
+        "key": "NEXT_PUBLIC_MIRROR_NODE_URL",
+        "description": "Mirror node REST base used to replay the audit trail. Defaults to https://testnet.mirrornode.hedera.com"
+      },
+      {
+        "key": "NEXT_PUBLIC_HCS_AUDIT_TOPIC_ID",
+        "description": "HCS topic the agent action receipts are written to, e.g. 0.0.67890"
+      },
+      {
+        "key": "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID",
+        "description": "WalletConnect project ID from https://cloud.walletconnect.com"
+      }
+    ],
+    "outro": {
+      "sections": [
+        {
+          "title": "Next steps",
+          "steps": [
+            {
+              "label": "Create a funded testnet account",
+              "url": "https://portal.hedera.com/faucet"
+            },
+            {
+              "label": "Compile and test the contracts",
+              "command": "{run:foundry:test}"
+            },
+            {
+              "label": "Create the HCS audit topic",
+              "command": "{run:hcs:create-topic}"
+            },
+            {
+              "label": "Start the frontend",
+              "command": "{run:next:dev}"
+            },
+            {
+              "text": "Set NEXT_PUBLIC_HCS_AUDIT_TOPIC_ID in packages/nextjs/.env.local before the audit trail will render."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
