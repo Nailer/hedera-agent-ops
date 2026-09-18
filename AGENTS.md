@@ -145,8 +145,8 @@ usage text and exit non-zero. That flag is eslint-only and belongs on `next:lint
 | `packages/foundry/script/HelperConfig.s.sol` | Every external protocol address, per chain | built |
 | `packages/foundry/test/HelperConfig.t.sol` | Address-book unit tests (hermetic) | built |
 | `packages/foundry/test/integration/HelperConfigFork.t.sol` | Proves addresses are live on-chain | built |
-| `packages/foundry/contracts/interfaces/IAgentAction.sol` | The adapter interface | planned |
-| `packages/foundry/contracts/AgentRegistry.sol` | Identity, operator binding, spend policy | planned |
+| `packages/foundry/contracts/interfaces/IAgentAction.sol` | The adapter interface | built |
+| `packages/foundry/contracts/AgentRegistry.sol` | Identity, operator binding, spend policy | built |
 | `packages/foundry/contracts/ActionRouter.sol` | Executes via adapter, emits the receipt | planned |
 | `packages/foundry/contracts/adapters/SaucerSwapAdapter.sol` | Swap leg | planned |
 | `packages/foundry/contracts/adapters/BonzoAdapter.sol` | Supply / borrow leg | planned |
