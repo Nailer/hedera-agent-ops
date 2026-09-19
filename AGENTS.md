@@ -147,7 +147,7 @@ usage text and exit non-zero. That flag is eslint-only and belongs on `next:lint
 | `packages/foundry/test/integration/HelperConfigFork.t.sol` | Proves addresses are live on-chain | built |
 | `packages/foundry/contracts/interfaces/IAgentAction.sol` | The adapter interface | built |
 | `packages/foundry/contracts/AgentRegistry.sol` | Identity, operator binding, spend policy | built |
-| `packages/foundry/contracts/ActionRouter.sol` | Executes via adapter, emits the receipt | planned |
+| `packages/foundry/contracts/ActionRouter.sol` | Executes via adapter, emits the receipt | built |
 | `packages/foundry/contracts/adapters/SaucerSwapAdapter.sol` | Swap leg | planned |
 | `packages/foundry/contracts/adapters/BonzoAdapter.sol` | Supply / borrow leg | planned |
 | `packages/nextjs/services/hcs/` | Receipt writer + mirror node reader | planned |
