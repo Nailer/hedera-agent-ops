@@ -88,6 +88,20 @@ Note the import path is `hedera-forking/htsSetup.sol`, **not** the
 `ffi = true` is already set in `foundry.toml` and is required for this. Expect fork tests that
 touch HTS tokens to take minutes, not seconds: each token's state is fetched over HTTP.
 
+Two corollaries that have each cost time in this repo:
+
+- **`vm.skip()` writes state, so a test using a skip modifier cannot be `view`.** The compiler
+  rejects it with "Function cannot be declared as view because this expression (potentially)
+  modifies the state", and points at the modifier rather than at `vm.skip`.
+- **`cast call` succeeding is not evidence a fork test will pass.** The live network has `0x167`;
+  a fork does not. A read that works perfectly from the command line can consume all gas and fail
+  with a bare "Unexpected error" under `forge test --fork-url`. The giveaway is a gas figure around
+  `1024178429` — that is the entire gas limit, not a real cost. Reach for `htsSetup()` before
+  debugging anything else.
+
+This bites well beyond direct token calls. Quoting a SaucerSwap swap reads the pool's HTS balances,
+so even a read-only price query needs the emulator under fork.
+
 ### Two address shapes, both valid
 
 - **HAPI-created contracts** (SaucerSwap) have no EVM-native address. The mirror node reports the
@@ -148,7 +162,7 @@ usage text and exit non-zero. That flag is eslint-only and belongs on `next:lint
 | `packages/foundry/contracts/interfaces/IAgentAction.sol` | The adapter interface | built |
 | `packages/foundry/contracts/AgentRegistry.sol` | Identity, operator binding, spend policy | built |
 | `packages/foundry/contracts/ActionRouter.sol` | Executes via adapter, emits the receipt | built |
-| `packages/foundry/contracts/adapters/SaucerSwapAdapter.sol` | Swap leg | planned |
+| `packages/foundry/contracts/adapters/SaucerSwapAdapter.sol` | Swap leg | built |
 | `packages/foundry/contracts/adapters/BonzoAdapter.sol` | Supply / borrow leg | planned |
 | `packages/nextjs/services/hcs/` | Receipt writer + mirror node reader | planned |
 | `packages/nextjs/components/agent/` | Registry browser, agent detail, audit feed | planned |

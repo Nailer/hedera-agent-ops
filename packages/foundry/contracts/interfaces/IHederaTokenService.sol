@@ -49,4 +49,9 @@ interface IHederaTokenService {
     function mintToken(address token, int64 amount, bytes[] memory metadata)
         external
         returns (int64 responseCode, int64 newTotalSupply, int64[] memory serialNumbers);
+
+    /// Associates `account` with `token`. A Hedera account -- contracts included -- cannot hold an
+    /// HTS token until it is associated, and a transfer to an unassociated account fails with
+    /// TOKEN_NOT_ASSOCIATED_TO_ACCOUNT. Returns 22 (SUCCESS) or an HTS response code.
+    function associateToken(address account, address token) external returns (int64 responseCode);
 }
