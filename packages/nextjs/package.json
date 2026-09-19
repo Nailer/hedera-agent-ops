@@ -7,7 +7,7 @@
     "check-types": "tsc --noEmit --incremental",
     "dev": "next dev",
     "format": "prettier --write . '!(node_modules|.next|contracts)/**/*'",
-    "lint": "next lint",
+    "lint": "eslint .",
     "serve": "next start",
     "start": "next dev"
   },
