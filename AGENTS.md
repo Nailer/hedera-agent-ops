@@ -166,6 +166,9 @@ usage text and exit non-zero. That flag is eslint-only and belongs on `next:lint
 | `packages/foundry/contracts/adapters/BonzoAdapter.sol` | Supply / withdraw / repay leg | built |
 | `packages/nextjs/services/hcs/` | Receipt writer + mirror node reader | planned |
 | `packages/nextjs/components/agent/` | Registry browser, agent detail, audit feed | planned |
+| `packages/foundry/contracts/HtsAssociatable.sol` | Shared HTS association for router + adapters | built |
+| `packages/foundry/script/DeployAgentOps.s.sol` | Deploys and wires the whole system | built |
+| `packages/foundry/script/AssociateTokens.s.sol` | Associates deployed contracts with HTS tokens | built |
 | `template.json` | Scaffold manifest — **required by the bounty gate** | built |
 
 Keep the Status column honest. An agent that trusts a "built" row and finds nothing wastes a cycle.

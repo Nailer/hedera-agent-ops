@@ -6,6 +6,7 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SaucerSwapAdapter } from "../contracts/adapters/SaucerSwapAdapter.sol";
 import { IAgentAction } from "../contracts/interfaces/IAgentAction.sol";
+import { HtsAssociatable } from "../contracts/HtsAssociatable.sol";
 import { MockERC20 } from "./harnesses/MockERC20.sol";
 import { MockSwapRouter } from "./harnesses/MockSwapRouter.sol";
 
@@ -276,7 +277,7 @@ contract SaucerSwapAdapterTest is Test {
 
     function test_RevertWhen_AssociatingZeroAddress() public {
         vm.prank(owner);
-        vm.expectRevert(SaucerSwapAdapter.SaucerSwapAdapter__ZeroAddress.selector);
+        vm.expectRevert(HtsAssociatable.HtsAssociatable__ZeroAddress.selector);
         adapter.associate(address(0));
     }
 

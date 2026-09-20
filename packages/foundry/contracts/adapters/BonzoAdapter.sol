@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IAgentAction } from "../interfaces/IAgentAction.sol";
 import { IBonzoLendingPool, IBonzoDataProvider } from "../interfaces/IBonzoLendingPool.sol";
-import { IHederaTokenService } from "../interfaces/IHederaTokenService.sol";
+import { HtsAssociatable } from "../HtsAssociatable.sol";
 
 /**
  * @title BonzoAdapter
@@ -34,7 +33,7 @@ import { IHederaTokenService } from "../interfaces/IHederaTokenService.sol";
  * and 2 is variable. Empty data defaults to variable, which is the mode most Bonzo reserves offer —
  * SAUCE on testnet has `stableBorrowRateEnabled = false`.
  */
-contract BonzoAdapter is IAgentAction, Ownable {
+contract BonzoAdapter is IAgentAction, HtsAssociatable {
     using SafeERC20 for IERC20;
 
     error BonzoAdapter__ZeroAddress();
@@ -43,13 +42,6 @@ contract BonzoAdapter is IAgentAction, Ownable {
     error BonzoAdapter__AssetInIsNotTheAToken(address declared, address expected);
     error BonzoAdapter__RepayAssetsMustMatch(address assetIn, address assetOut);
     error BonzoAdapter__InvalidRateMode(uint256 rateMode);
-    error BonzoAdapter__AssociationFailed(address token, int64 responseCode);
-
-    event TokenAssociated(address indexed token);
-
-    address private constant HTS = 0x0000000000000000000000000000000000000167;
-    int64 private constant HTS_SUCCESS = 22;
-    int64 private constant HTS_ALREADY_ASSOCIATED = 194;
 
     uint256 private constant RATE_MODE_STABLE = 1;
     uint256 private constant RATE_MODE_VARIABLE = 2;
@@ -58,7 +50,9 @@ contract BonzoAdapter is IAgentAction, Ownable {
     IBonzoLendingPool public immutable lendingPool;
     IBonzoDataProvider public immutable dataProvider;
 
-    constructor(address initialOwner, address lendingPoolAddress, address dataProviderAddress) Ownable(initialOwner) {
+    constructor(address initialOwner, address lendingPoolAddress, address dataProviderAddress)
+        HtsAssociatable(initialOwner)
+    {
         if (lendingPoolAddress == address(0) || dataProviderAddress == address(0)) {
             revert BonzoAdapter__ZeroAddress();
         }
@@ -74,20 +68,6 @@ contract BonzoAdapter is IAgentAction, Ownable {
     /// @inheritdoc IAgentAction
     function supportsAction(ActionKind kind) external pure returns (bool) {
         return kind == ActionKind.Supply || kind == ActionKind.Withdraw || kind == ActionKind.Repay;
-    }
-
-    /**
-     * @notice Associate this adapter with an HTS token so it can hold and move it.
-     * @dev Needed for both underlyings and aTokens — an aToken is itself an HTS token on Hedera.
-     *      Idempotent: an already-associated token returns 194 and is treated as success.
-     */
-    function associate(address token) external onlyOwner {
-        if (token == address(0)) revert BonzoAdapter__ZeroAddress();
-        int64 responseCode = IHederaTokenService(HTS).associateToken(address(this), token);
-        if (responseCode != HTS_SUCCESS && responseCode != HTS_ALREADY_ASSOCIATED) {
-            revert BonzoAdapter__AssociationFailed(token, responseCode);
-        }
-        emit TokenAssociated(token);
     }
 
     /// @inheritdoc IAgentAction

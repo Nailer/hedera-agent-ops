@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IAgentAction } from "../interfaces/IAgentAction.sol";
 import { ISaucerSwapV2Router } from "../interfaces/ISaucerSwapV2Router.sol";
-import { IHederaTokenService } from "../interfaces/IHederaTokenService.sol";
+import { HtsAssociatable } from "../HtsAssociatable.sol";
 
 /**
  * @title SaucerSwapAdapter
@@ -33,27 +32,17 @@ import { IHederaTokenService } from "../interfaces/IHederaTokenService.sol";
  * means the ActionRouter, not this adapter, is the account that must be associated with the output
  * token.
  *
- * **Association.** A Hedera account cannot hold an HTS token until associated, contracts included.
- * `associate` is exposed for the owner to prepare this adapter for tokens it will handle. The
- * router and the agent treasury need the same treatment for their own sides of the flow.
+ * **Association.** Inherited from `HtsAssociatable`. This adapter receives the input token before
+ * it swaps, so it must be associated with every token it will be handed. Output goes straight to
+ * the router, so the router needs its own associations — and so does the agent treasury.
  */
-contract SaucerSwapAdapter is IAgentAction, Ownable {
+contract SaucerSwapAdapter is IAgentAction, HtsAssociatable {
     using SafeERC20 for IERC20;
 
     error SaucerSwapAdapter__ZeroAddress();
     error SaucerSwapAdapter__MalformedPath(uint256 length);
     error SaucerSwapAdapter__PathInputMismatch(address pathToken, address requestToken);
     error SaucerSwapAdapter__PathOutputMismatch(address pathToken, address requestToken);
-    error SaucerSwapAdapter__AssociationFailed(address token, int64 responseCode);
-
-    event TokenAssociated(address indexed token);
-
-    /// @dev HTS system contract. See AGENTS.md for why this is absent under a plain EVM fork.
-    address private constant HTS = 0x0000000000000000000000000000000000000167;
-
-    /// @dev HTS success. 194 is TOKEN_ALREADY_ASSOCIATED_TO_ACCOUNT, which is benign here.
-    int64 private constant HTS_SUCCESS = 22;
-    int64 private constant HTS_ALREADY_ASSOCIATED = 194;
 
     uint256 private constant ADDRESS_BYTES = 20;
     uint256 private constant FEE_BYTES = 3;
@@ -63,7 +52,7 @@ contract SaucerSwapAdapter is IAgentAction, Ownable {
 
     ISaucerSwapV2Router public immutable swapRouter;
 
-    constructor(address initialOwner, address swapRouterAddress) Ownable(initialOwner) {
+    constructor(address initialOwner, address swapRouterAddress) HtsAssociatable(initialOwner) {
         if (swapRouterAddress == address(0)) revert SaucerSwapAdapter__ZeroAddress();
         swapRouter = ISaucerSwapV2Router(swapRouterAddress);
     }
@@ -76,20 +65,6 @@ contract SaucerSwapAdapter is IAgentAction, Ownable {
     /// @inheritdoc IAgentAction
     function supportsAction(ActionKind kind) external pure returns (bool) {
         return kind == ActionKind.Swap;
-    }
-
-    /**
-     * @notice Associate this adapter with an HTS token so it can hold and move it.
-     * @dev Idempotent: an already-associated token returns 194 and is treated as success, so a
-     *      redeploy or a repeated setup script does not fail.
-     */
-    function associate(address token) external onlyOwner {
-        if (token == address(0)) revert SaucerSwapAdapter__ZeroAddress();
-        int64 responseCode = IHederaTokenService(HTS).associateToken(address(this), token);
-        if (responseCode != HTS_SUCCESS && responseCode != HTS_ALREADY_ASSOCIATED) {
-            revert SaucerSwapAdapter__AssociationFailed(token, responseCode);
-        }
-        emit TokenAssociated(token);
     }
 
     /// @inheritdoc IAgentAction

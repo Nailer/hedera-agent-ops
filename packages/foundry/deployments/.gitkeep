@@ -1,0 +1,6 @@
+Deploy scripts write <chainId>.json here, and generateTsAbis.js reads it to produce
+packages/nextjs/contracts/deployedContracts.ts.
+
+This file exists so the directory survives a clone. Git does not track empty directories, and
+foundry.toml grants read-write fs_permissions on this path, so without it the first deploy fails
+at vm.writeJson with "No such file or directory" after every contract has already been deployed.

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IAgentAction } from "./interfaces/IAgentAction.sol";
 import { AgentRegistry } from "./AgentRegistry.sol";
+import { HtsAssociatable } from "./HtsAssociatable.sol";
 
 /**
  * @title ActionRouter
@@ -33,11 +33,16 @@ import { AgentRegistry } from "./AgentRegistry.sol";
  * have the router pull a treasury's approved balance straight into it. The allowlist is what makes
  * the approval to this router safe to grant.
  *
+ * **This contract must be associated with every token it handles.** It takes custody of both the
+ * input and the output for the duration of a call, so on Hedera it cannot hold either without
+ * association — `HtsAssociatable` provides that. Missing it breaks the flow at runtime while every
+ * hermetic test still passes, because a local EVM has no such concept.
+ *
  * Native HBAR is not handled in this version. Every flow here is token-denominated; wrapping is the
  * adapter's business via WHBAR. `executeAction` is deliberately non-payable so there is no
  * half-built native path to mistake for a working one.
  */
-contract ActionRouter is Ownable, ReentrancyGuard {
+contract ActionRouter is HtsAssociatable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     error ActionRouter__ZeroAddress();
@@ -75,7 +80,7 @@ contract ActionRouter is Ownable, ReentrancyGuard {
     mapping(address adapter => bool enabled) public isAdapterEnabled;
     mapping(uint256 agentId => uint256 count) public actionCount;
 
-    constructor(address initialOwner, address registryAddress) Ownable(initialOwner) {
+    constructor(address initialOwner, address registryAddress) HtsAssociatable(initialOwner) {
         if (registryAddress == address(0)) revert ActionRouter__ZeroAddress();
         registry = AgentRegistry(registryAddress);
     }

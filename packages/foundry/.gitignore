@@ -9,7 +9,14 @@ broadcast/
 # Docs
 docs/
 
-deployments/
+# Deployment output is per-environment and not tracked, but the directory itself must exist:
+# foundry.toml grants read-write fs_permissions on it, and the first deploy fails at vm.writeJson
+# if it is missing -- after every contract has already been deployed. Git does not track empty
+# directories, so .gitkeep is committed deliberately. Note `deployments/*` rather than
+# `deployments/`: a trailing-slash ignore stops git descending into the directory at all, and the
+# negation below would never be reached.
+deployments/*
+!deployments/.gitkeep
 .env
 localhost.json
 

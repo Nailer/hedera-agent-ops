@@ -5,6 +5,7 @@ import { Test } from "forge-std/Test.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { BonzoAdapter } from "../contracts/adapters/BonzoAdapter.sol";
 import { IAgentAction } from "../contracts/interfaces/IAgentAction.sol";
+import { HtsAssociatable } from "../contracts/HtsAssociatable.sol";
 import { MockERC20 } from "./harnesses/MockERC20.sol";
 import { MockBonzoLendingPool, MockBonzoDataProvider } from "./harnesses/MockBonzo.sol";
 
@@ -305,7 +306,7 @@ contract BonzoAdapterTest is Test {
 
     function test_RevertWhen_AssociatingZeroAddress() public {
         vm.prank(owner);
-        vm.expectRevert(BonzoAdapter.BonzoAdapter__ZeroAddress.selector);
+        vm.expectRevert(HtsAssociatable.HtsAssociatable__ZeroAddress.selector);
         adapter.associate(address(0));
     }
 
