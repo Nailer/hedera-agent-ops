@@ -163,7 +163,7 @@ usage text and exit non-zero. That flag is eslint-only and belongs on `next:lint
 | `packages/foundry/contracts/AgentRegistry.sol` | Identity, operator binding, spend policy | built |
 | `packages/foundry/contracts/ActionRouter.sol` | Executes via adapter, emits the receipt | built |
 | `packages/foundry/contracts/adapters/SaucerSwapAdapter.sol` | Swap leg | built |
-| `packages/foundry/contracts/adapters/BonzoAdapter.sol` | Supply / borrow leg | planned |
+| `packages/foundry/contracts/adapters/BonzoAdapter.sol` | Supply / withdraw / repay leg | built |
 | `packages/nextjs/services/hcs/` | Receipt writer + mirror node reader | planned |
 | `packages/nextjs/components/agent/` | Registry browser, agent detail, audit feed | planned |
 | `template.json` | Scaffold manifest — **required by the bounty gate** | built |
