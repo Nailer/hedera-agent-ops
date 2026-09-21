@@ -102,6 +102,28 @@ Two corollaries that have each cost time in this repo:
 This bites well beyond direct token calls. Quoting a SaucerSwap swap reads the pool's HTS balances,
 so even a read-only price query needs the emulator under fork.
 
+### Mirror node topic queries need a bounded window, max 7 days
+
+Filtering contract logs by `topic0` without a timestamp range returns **HTTP 400**:
+
+```
+Cannot search topics without a valid timestamp range: No timestamp range or eq operator provided
+```
+
+Both bounds are required — a lower (`gt`/`gte`) *and* an upper (`lt`/`lte`). Supplying only one is
+rejected too, with a different message. And the range may not exceed **7 days**: verified against
+the live API, a 6-day window is accepted and an 8-day window returns *"must be positive and within
+7d"*.
+
+This is not in the mirror node documentation and it is not discoverable locally — the query is
+well-formed, it just comes back 400. An agent's full history therefore cannot be fetched in one
+call; `previousWindow` in `services/audit/mirrorNode.ts` walks backwards a week at a time, and the
+windows are deliberately non-overlapping so a receipt on a boundary is not returned twice.
+
+Pagination *within* a window is cursor-based: follow `links.next` verbatim. It is a relative path
+that already carries the correct `timestamp=lte:` and `index=lt:` bounds. Building your own offsets
+against a growing log set skips and repeats records.
+
 ### Two address shapes, both valid
 
 - **HAPI-created contracts** (SaucerSwap) have no EVM-native address. The mirror node reports the

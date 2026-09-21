@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hedera-agent-ops",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["next:dev"],
+      "port": 3000
+    }
+  ]
+}

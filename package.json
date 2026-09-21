@@ -39,7 +39,8 @@
     "next:start": "yarn workspace @sh/nextjs start",
     "postinstall": "husky",
     "precommit": "lint-staged",
-    "lint-staged": "lint-staged"
+    "lint-staged": "lint-staged",
+    "next:test": "yarn workspace @sh/nextjs test"
   },
   "packageManager": "yarn@3.2.3",
   "devDependencies": {

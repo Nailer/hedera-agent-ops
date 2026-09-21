@@ -167,6 +167,14 @@ unassociated account fails at the moment of delivery, after the work is done. Ru
 `AssociateTokens.s.sol` after deploying, and associate the agent treasury yourself — that is your
 account, not the template's.
 
+**Mirror node topic queries need a bounded window, and it may not exceed 7 days.** Filtering
+contract logs by `topic0` without a timestamp range returns HTTP 400 — *"Cannot search topics
+without a valid timestamp range"*. Both a lower and an upper bound are required, and a range wider
+than 7 days is refused. Neither is in the mirror node docs; the query looks well-formed and simply
+comes back 400. Reading a long-lived agent's full history therefore means walking backwards a week
+at a time — `previousWindow` in `services/audit/mirrorNode.ts` does that, with non-overlapping
+windows so boundary receipts are not counted twice.
+
 **Two address shapes, both valid.** SaucerSwap was created through HAPI and resolves to the
 long-zero form (`0.0.1414040` → `0x…159398`); Bonzo was EVM-deployed and has ordinary keccak
 addresses. Never hand-derive a long-zero address — resolve it from the mirror node
