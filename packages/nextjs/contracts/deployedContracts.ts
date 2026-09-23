@@ -6,8 +6,8 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-hbar/contract";
 
 const deployedContracts = {
   296: {
-    HederaToken: {
-      address: "0xa510c1b5ebcefb83267f4f2bae2765611606c85a",
+    AgentRegistry: {
+      address: "0x2bcd5637fc34ecc488eba4ba209dacad05cf0d76",
       abi: [
         {
           type: "constructor",
@@ -22,90 +22,97 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "allowance",
-          inputs: [
-            {
-              name: "owner",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "spender",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "approve",
-          inputs: [
-            {
-              name: "spender",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "value",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "balanceOf",
-          inputs: [
-            {
-              name: "account",
-              type: "address",
-              internalType: "address",
-            },
-          ],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "decimals",
+          name: "actionRouter",
           inputs: [],
           outputs: [
             {
               name: "",
-              type: "uint8",
-              internalType: "uint8",
+              type: "address",
+              internalType: "address",
             },
           ],
           stateMutability: "view",
         },
         {
           type: "function",
-          name: "mint",
+          name: "agentCount",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "agentOf",
           inputs: [
             {
-              name: "to",
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "tuple",
+              internalType: "struct AgentRegistry.Agent",
+              components: [
+                {
+                  name: "controller",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "operator",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "treasury",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "metadataURI",
+                  type: "string",
+                  internalType: "string",
+                },
+                {
+                  name: "active",
+                  type: "bool",
+                  internalType: "bool",
+                },
+                {
+                  name: "registeredAt",
+                  type: "uint64",
+                  internalType: "uint64",
+                },
+              ],
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "authorizeSpend",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "operator",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "token",
               type: "address",
               internalType: "address",
             },
@@ -120,13 +127,24 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "name",
-          inputs: [],
+          name: "isAuthorizedOperator",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "operator",
+              type: "address",
+              internalType: "address",
+            },
+          ],
           outputs: [
             {
               name: "",
-              type: "string",
-              internalType: "string",
+              type: "bool",
+              internalType: "bool",
             },
           ],
           stateMutability: "view",
@@ -146,6 +164,76 @@ const deployedContracts = {
         },
         {
           type: "function",
+          name: "policyOf",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "tuple",
+              internalType: "struct AgentRegistry.SpendPolicy",
+              components: [
+                {
+                  name: "maxPerAction",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "maxPerEpoch",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "epochDuration",
+                  type: "uint64",
+                  internalType: "uint64",
+                },
+              ],
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "registerAgent",
+          inputs: [
+            {
+              name: "operator",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "treasury",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "metadataURI",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          outputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
           name: "renounceOwnership",
           inputs: [],
           outputs: [],
@@ -153,81 +241,162 @@ const deployedContracts = {
         },
         {
           type: "function",
-          name: "symbol",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "string",
-              internalType: "string",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "totalSupply",
-          inputs: [],
-          outputs: [
-            {
-              name: "",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          stateMutability: "view",
-        },
-        {
-          type: "function",
-          name: "transfer",
+          name: "setActionRouter",
           inputs: [
             {
-              name: "to",
+              name: "router",
               type: "address",
               internalType: "address",
             },
-            {
-              name: "value",
-              type: "uint256",
-              internalType: "uint256",
-            },
           ],
-          outputs: [
-            {
-              name: "",
-              type: "bool",
-              internalType: "bool",
-            },
-          ],
+          outputs: [],
           stateMutability: "nonpayable",
         },
         {
           type: "function",
-          name: "transferFrom",
+          name: "setActive",
           inputs: [
             {
-              name: "from",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "to",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "value",
+              name: "agentId",
               type: "uint256",
               internalType: "uint256",
+            },
+            {
+              name: "active",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "setMetadataURI",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "metadataURI",
+              type: "string",
+              internalType: "string",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "setOperator",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "operator",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "setSpendPolicy",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "maxPerAction",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "maxPerEpoch",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "epochDuration",
+              type: "uint64",
+              internalType: "uint64",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "setTreasury",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "treasury",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "spentThisEpoch",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
             },
           ],
           outputs: [
             {
               name: "",
-              type: "bool",
-              internalType: "bool",
+              type: "uint256",
+              internalType: "uint256",
             },
           ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "transferControl",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "newController",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
           stateMutability: "nonpayable",
         },
         {
@@ -245,25 +414,132 @@ const deployedContracts = {
         },
         {
           type: "event",
-          name: "Approval",
+          name: "ActionRouterChanged",
           inputs: [
             {
-              name: "owner",
+              name: "previousRouter",
               type: "address",
               indexed: true,
               internalType: "address",
             },
             {
-              name: "spender",
+              name: "newRouter",
               type: "address",
               indexed: true,
               internalType: "address",
             },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "ActiveChanged",
+          inputs: [
             {
-              name: "value",
+              name: "agentId",
               type: "uint256",
-              indexed: false,
+              indexed: true,
               internalType: "uint256",
+            },
+            {
+              name: "active",
+              type: "bool",
+              indexed: false,
+              internalType: "bool",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "AgentRegistered",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "controller",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "operator",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "ControllerTransferred",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "previousController",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "newController",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "MetadataChanged",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "metadataURI",
+              type: "string",
+              indexed: false,
+              internalType: "string",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "OperatorChanged",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "previousOperator",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "newOperator",
+              type: "address",
+              indexed: true,
+              internalType: "address",
             },
           ],
           anonymous: false,
@@ -289,22 +565,65 @@ const deployedContracts = {
         },
         {
           type: "event",
-          name: "Transfer",
+          name: "SpendPolicyChanged",
           inputs: [
             {
-              name: "from",
+              name: "agentId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "token",
               type: "address",
               indexed: true,
               internalType: "address",
             },
             {
-              name: "to",
+              name: "maxPerAction",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "maxPerEpoch",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "epochDuration",
+              type: "uint64",
+              indexed: false,
+              internalType: "uint64",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "SpendRecorded",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "token",
               type: "address",
               indexed: true,
               internalType: "address",
             },
             {
-              name: "value",
+              name: "amount",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "epochTotal",
               type: "uint256",
               indexed: false,
               internalType: "uint256",
@@ -313,42 +632,36 @@ const deployedContracts = {
           anonymous: false,
         },
         {
-          type: "error",
-          name: "ERC20InsufficientAllowance",
+          type: "event",
+          name: "TreasuryChanged",
           inputs: [
             {
-              name: "spender",
+              name: "agentId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "previousTreasury",
               type: "address",
+              indexed: true,
               internalType: "address",
             },
             {
-              name: "allowance",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "needed",
-              type: "uint256",
-              internalType: "uint256",
+              name: "newTreasury",
+              type: "address",
+              indexed: true,
+              internalType: "address",
             },
           ],
+          anonymous: false,
         },
         {
           type: "error",
-          name: "ERC20InsufficientBalance",
+          name: "AgentRegistry__AgentInactive",
           inputs: [
             {
-              name: "sender",
-              type: "address",
-              internalType: "address",
-            },
-            {
-              name: "balance",
-              type: "uint256",
-              internalType: "uint256",
-            },
-            {
-              name: "needed",
+              name: "agentId",
               type: "uint256",
               internalType: "uint256",
             },
@@ -356,10 +669,52 @@ const deployedContracts = {
         },
         {
           type: "error",
-          name: "ERC20InvalidApprover",
+          name: "AgentRegistry__ExceedsPerAction",
           inputs: [
             {
-              name: "approver",
+              name: "requested",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "allowed",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "AgentRegistry__ExceedsPerEpoch",
+          inputs: [
+            {
+              name: "requested",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "remaining",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "AgentRegistry__InvalidPolicy",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "AgentRegistry__NoPolicy",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "token",
               type: "address",
               internalType: "address",
             },
@@ -367,10 +722,15 @@ const deployedContracts = {
         },
         {
           type: "error",
-          name: "ERC20InvalidReceiver",
+          name: "AgentRegistry__NotController",
           inputs: [
             {
-              name: "receiver",
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "caller",
               type: "address",
               internalType: "address",
             },
@@ -378,10 +738,15 @@ const deployedContracts = {
         },
         {
           type: "error",
-          name: "ERC20InvalidSender",
+          name: "AgentRegistry__NotOperator",
           inputs: [
             {
-              name: "sender",
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "caller",
               type: "address",
               internalType: "address",
             },
@@ -389,14 +754,30 @@ const deployedContracts = {
         },
         {
           type: "error",
-          name: "ERC20InvalidSpender",
+          name: "AgentRegistry__NotRouter",
           inputs: [
             {
-              name: "spender",
+              name: "caller",
               type: "address",
               internalType: "address",
             },
           ],
+        },
+        {
+          type: "error",
+          name: "AgentRegistry__UnknownAgent",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "AgentRegistry__ZeroAddress",
+          inputs: [],
         },
         {
           type: "error",
@@ -422,74 +803,416 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 33578755,
+      deployedOnBlock: 40893517,
     },
-    HtsTokenCreator: {
-      address: "0x03fcda15d3955b20557028db9fabe6f5847f00ab",
+    ActionRouter: {
+      address: "0x50f1ae91073add5dc4f833c95ce8230872ce4f88",
       abi: [
         {
-          type: "function",
-          name: "HTS",
-          inputs: [],
-          outputs: [
+          type: "constructor",
+          inputs: [
             {
-              name: "",
+              name: "initialOwner",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "registryAddress",
               type: "address",
               internalType: "address",
             },
           ],
-          stateMutability: "view",
+          stateMutability: "nonpayable",
         },
         {
           type: "function",
-          name: "SUCCESS",
-          inputs: [],
+          name: "actionCount",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
           outputs: [
             {
-              name: "",
-              type: "int64",
-              internalType: "int64",
+              name: "count",
+              type: "uint256",
+              internalType: "uint256",
             },
           ],
           stateMutability: "view",
         },
         {
           type: "function",
-          name: "createToken",
+          name: "associate",
           inputs: [
             {
-              name: "name",
-              type: "string",
-              internalType: "string",
+              name: "token",
+              type: "address",
+              internalType: "address",
             },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "associateMany",
+          inputs: [
             {
-              name: "symbol",
-              type: "string",
-              internalType: "string",
+              name: "tokens",
+              type: "address[]",
+              internalType: "address[]",
             },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "disableAdapter",
+          inputs: [
             {
-              name: "initialSupply",
+              name: "adapter",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "enableAdapter",
+          inputs: [
+            {
+              name: "adapter",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "executeAction",
+          inputs: [
+            {
+              name: "agentId",
               type: "uint256",
               internalType: "uint256",
             },
             {
-              name: "decimals",
-              type: "uint8",
-              internalType: "uint8",
+              name: "adapter",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "request",
+              type: "tuple",
+              internalType: "struct IAgentAction.ActionRequest",
+              components: [
+                {
+                  name: "kind",
+                  type: "uint8",
+                  internalType: "enum IAgentAction.ActionKind",
+                },
+                {
+                  name: "assetIn",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "amountIn",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "assetOut",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "minAmountOut",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "protocolData",
+                  type: "bytes",
+                  internalType: "bytes",
+                },
+              ],
             },
           ],
           outputs: [
             {
-              name: "tokenAddress",
+              name: "amountOut",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "isAdapterEnabled",
+          inputs: [
+            {
+              name: "adapter",
               type: "address",
               internalType: "address",
             },
           ],
-          stateMutability: "payable",
+          outputs: [
+            {
+              name: "enabled",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "view",
         },
         {
           type: "function",
-          name: "mintToken",
+          name: "owner",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "registry",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract AgentRegistry",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "renounceOwnership",
+          inputs: [],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "transferOwnership",
+          inputs: [
+            {
+              name: "newOwner",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "event",
+          name: "ActionExecuted",
+          inputs: [
+            {
+              name: "agentId",
+              type: "uint256",
+              indexed: true,
+              internalType: "uint256",
+            },
+            {
+              name: "protocolId",
+              type: "bytes32",
+              indexed: true,
+              internalType: "bytes32",
+            },
+            {
+              name: "kind",
+              type: "uint8",
+              indexed: true,
+              internalType: "enum IAgentAction.ActionKind",
+            },
+            {
+              name: "operator",
+              type: "address",
+              indexed: false,
+              internalType: "address",
+            },
+            {
+              name: "assetIn",
+              type: "address",
+              indexed: false,
+              internalType: "address",
+            },
+            {
+              name: "amountIn",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "assetOut",
+              type: "address",
+              indexed: false,
+              internalType: "address",
+            },
+            {
+              name: "amountOut",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+            {
+              name: "protocolRef",
+              type: "bytes32",
+              indexed: false,
+              internalType: "bytes32",
+            },
+            {
+              name: "sequence",
+              type: "uint256",
+              indexed: false,
+              internalType: "uint256",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "AdapterDisabled",
+          inputs: [
+            {
+              name: "adapter",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "AdapterEnabled",
+          inputs: [
+            {
+              name: "adapter",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "protocolId",
+              type: "bytes32",
+              indexed: true,
+              internalType: "bytes32",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "OwnershipTransferred",
+          inputs: [
+            {
+              name: "previousOwner",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "newOwner",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "TokenAssociated",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "error",
+          name: "ActionRouter__AdapterNotEnabled",
+          inputs: [
+            {
+              name: "adapter",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "ActionRouter__AdapterRejectsAction",
+          inputs: [
+            {
+              name: "adapter",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "kind",
+              type: "uint8",
+              internalType: "enum IAgentAction.ActionKind",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "ActionRouter__InsufficientOutput",
+          inputs: [
+            {
+              name: "received",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "minimum",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "ActionRouter__SameAssetRequiresNoSweep",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "ActionRouter__ZeroAddress",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "ActionRouter__ZeroAmount",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "HtsAssociatable__AssociationFailed",
           inputs: [
             {
               name: "token",
@@ -497,69 +1220,6 @@ const deployedContracts = {
               internalType: "address",
             },
             {
-              name: "amount",
-              type: "uint256",
-              internalType: "uint256",
-            },
-          ],
-          outputs: [
-            {
-              name: "newTotalSupply",
-              type: "int64",
-              internalType: "int64",
-            },
-          ],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "event",
-          name: "TokenCreated",
-          inputs: [
-            {
-              name: "tokenAddress",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "name",
-              type: "string",
-              indexed: false,
-              internalType: "string",
-            },
-            {
-              name: "symbol",
-              type: "string",
-              indexed: false,
-              internalType: "string",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "event",
-          name: "TokenMinted",
-          inputs: [
-            {
-              name: "tokenAddress",
-              type: "address",
-              indexed: true,
-              internalType: "address",
-            },
-            {
-              name: "newTotalSupply",
-              type: "int64",
-              indexed: false,
-              internalType: "int64",
-            },
-          ],
-          anonymous: false,
-        },
-        {
-          type: "error",
-          name: "HtsCreateFailed",
-          inputs: [
-            {
               name: "responseCode",
               type: "int64",
               internalType: "int64",
@@ -568,18 +1228,817 @@ const deployedContracts = {
         },
         {
           type: "error",
-          name: "HtsMintFailed",
+          name: "HtsAssociatable__ZeroAddress",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "OwnableInvalidOwner",
           inputs: [
             {
-              name: "responseCode",
-              type: "int64",
-              internalType: "int64",
+              name: "owner",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "OwnableUnauthorizedAccount",
+          inputs: [
+            {
+              name: "account",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "ReentrancyGuardReentrantCall",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "SafeERC20FailedOperation",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
             },
           ],
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 33578759,
+      deployedOnBlock: 40893520,
+    },
+    SaucerSwapAdapter: {
+      address: "0x34dc78d33a76e5ac6c5546c6241f903c66fca506",
+      abi: [
+        {
+          type: "constructor",
+          inputs: [
+            {
+              name: "initialOwner",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "swapRouterAddress",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "associate",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "associateMany",
+          inputs: [
+            {
+              name: "tokens",
+              type: "address[]",
+              internalType: "address[]",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "execute",
+          inputs: [
+            {
+              name: "request",
+              type: "tuple",
+              internalType: "struct IAgentAction.ActionRequest",
+              components: [
+                {
+                  name: "kind",
+                  type: "uint8",
+                  internalType: "enum IAgentAction.ActionKind",
+                },
+                {
+                  name: "assetIn",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "amountIn",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "assetOut",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "minAmountOut",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "protocolData",
+                  type: "bytes",
+                  internalType: "bytes",
+                },
+              ],
+            },
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "tuple",
+              internalType: "struct IAgentAction.ActionResult",
+              components: [
+                {
+                  name: "assetOut",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "amountOut",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "protocolRef",
+                  type: "bytes32",
+                  internalType: "bytes32",
+                },
+              ],
+            },
+          ],
+          stateMutability: "payable",
+        },
+        {
+          type: "function",
+          name: "owner",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "protocolId",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          stateMutability: "pure",
+        },
+        {
+          type: "function",
+          name: "renounceOwnership",
+          inputs: [],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "supportsAction",
+          inputs: [
+            {
+              name: "kind",
+              type: "uint8",
+              internalType: "enum IAgentAction.ActionKind",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "pure",
+        },
+        {
+          type: "function",
+          name: "swapRouter",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract ISaucerSwapV2Router",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "transferOwnership",
+          inputs: [
+            {
+              name: "newOwner",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "event",
+          name: "OwnershipTransferred",
+          inputs: [
+            {
+              name: "previousOwner",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "newOwner",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "TokenAssociated",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "error",
+          name: "HtsAssociatable__AssociationFailed",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "responseCode",
+              type: "int64",
+              internalType: "int64",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "HtsAssociatable__ZeroAddress",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "IAgentAction__InsufficientOutput",
+          inputs: [
+            {
+              name: "received",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "minimum",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "IAgentAction__UnsupportedAction",
+          inputs: [
+            {
+              name: "kind",
+              type: "uint8",
+              internalType: "enum IAgentAction.ActionKind",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "OwnableInvalidOwner",
+          inputs: [
+            {
+              name: "owner",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "OwnableUnauthorizedAccount",
+          inputs: [
+            {
+              name: "account",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SafeERC20FailedOperation",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SaucerSwapAdapter__MalformedPath",
+          inputs: [
+            {
+              name: "length",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SaucerSwapAdapter__PathInputMismatch",
+          inputs: [
+            {
+              name: "pathToken",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "requestToken",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SaucerSwapAdapter__PathOutputMismatch",
+          inputs: [
+            {
+              name: "pathToken",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "requestToken",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SaucerSwapAdapter__ZeroAddress",
+          inputs: [],
+        },
+      ],
+      inheritedFunctions: {},
+      deployedOnBlock: 40893525,
+    },
+    BonzoAdapter: {
+      address: "0x5b89b6ba0bb905f97bb0da0f827e20d930f5abc0",
+      abi: [
+        {
+          type: "constructor",
+          inputs: [
+            {
+              name: "initialOwner",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "lendingPoolAddress",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "dataProviderAddress",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "associate",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "associateMany",
+          inputs: [
+            {
+              name: "tokens",
+              type: "address[]",
+              internalType: "address[]",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "dataProvider",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract IBonzoDataProvider",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "execute",
+          inputs: [
+            {
+              name: "request",
+              type: "tuple",
+              internalType: "struct IAgentAction.ActionRequest",
+              components: [
+                {
+                  name: "kind",
+                  type: "uint8",
+                  internalType: "enum IAgentAction.ActionKind",
+                },
+                {
+                  name: "assetIn",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "amountIn",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "assetOut",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "minAmountOut",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "protocolData",
+                  type: "bytes",
+                  internalType: "bytes",
+                },
+              ],
+            },
+            {
+              name: "onBehalfOf",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "tuple",
+              internalType: "struct IAgentAction.ActionResult",
+              components: [
+                {
+                  name: "assetOut",
+                  type: "address",
+                  internalType: "address",
+                },
+                {
+                  name: "amountOut",
+                  type: "uint256",
+                  internalType: "uint256",
+                },
+                {
+                  name: "protocolRef",
+                  type: "bytes32",
+                  internalType: "bytes32",
+                },
+              ],
+            },
+          ],
+          stateMutability: "payable",
+        },
+        {
+          type: "function",
+          name: "lendingPool",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "contract IBonzoLendingPool",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "owner",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          stateMutability: "view",
+        },
+        {
+          type: "function",
+          name: "protocolId",
+          inputs: [],
+          outputs: [
+            {
+              name: "",
+              type: "bytes32",
+              internalType: "bytes32",
+            },
+          ],
+          stateMutability: "pure",
+        },
+        {
+          type: "function",
+          name: "renounceOwnership",
+          inputs: [],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "function",
+          name: "supportsAction",
+          inputs: [
+            {
+              name: "kind",
+              type: "uint8",
+              internalType: "enum IAgentAction.ActionKind",
+            },
+          ],
+          outputs: [
+            {
+              name: "",
+              type: "bool",
+              internalType: "bool",
+            },
+          ],
+          stateMutability: "pure",
+        },
+        {
+          type: "function",
+          name: "transferOwnership",
+          inputs: [
+            {
+              name: "newOwner",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+          outputs: [],
+          stateMutability: "nonpayable",
+        },
+        {
+          type: "event",
+          name: "OwnershipTransferred",
+          inputs: [
+            {
+              name: "previousOwner",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+            {
+              name: "newOwner",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "event",
+          name: "TokenAssociated",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              indexed: true,
+              internalType: "address",
+            },
+          ],
+          anonymous: false,
+        },
+        {
+          type: "error",
+          name: "BonzoAdapter__AssetInIsNotTheAToken",
+          inputs: [
+            {
+              name: "declared",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "expected",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "BonzoAdapter__AssetOutIsNotTheAToken",
+          inputs: [
+            {
+              name: "declared",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "expected",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "BonzoAdapter__InvalidRateMode",
+          inputs: [
+            {
+              name: "rateMode",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "BonzoAdapter__RepayAssetsMustMatch",
+          inputs: [
+            {
+              name: "assetIn",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "assetOut",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "BonzoAdapter__ReserveNotListed",
+          inputs: [
+            {
+              name: "asset",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "BonzoAdapter__ZeroAddress",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "HtsAssociatable__AssociationFailed",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+            {
+              name: "responseCode",
+              type: "int64",
+              internalType: "int64",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "HtsAssociatable__ZeroAddress",
+          inputs: [],
+        },
+        {
+          type: "error",
+          name: "IAgentAction__InsufficientOutput",
+          inputs: [
+            {
+              name: "received",
+              type: "uint256",
+              internalType: "uint256",
+            },
+            {
+              name: "minimum",
+              type: "uint256",
+              internalType: "uint256",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "IAgentAction__UnsupportedAction",
+          inputs: [
+            {
+              name: "kind",
+              type: "uint8",
+              internalType: "enum IAgentAction.ActionKind",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "OwnableInvalidOwner",
+          inputs: [
+            {
+              name: "owner",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "OwnableUnauthorizedAccount",
+          inputs: [
+            {
+              name: "account",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+        {
+          type: "error",
+          name: "SafeERC20FailedOperation",
+          inputs: [
+            {
+              name: "token",
+              type: "address",
+              internalType: "address",
+            },
+          ],
+        },
+      ],
+      inheritedFunctions: {},
+      deployedOnBlock: 40893528,
     },
   },
 } as const;
