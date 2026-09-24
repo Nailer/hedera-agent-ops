@@ -21,25 +21,44 @@
  * Address resolution still happens in Solidity, via PrintAssociationPlan.s.sol — reads work fine
  * under forge, and it keeps HelperConfig as the single place a protocol address is written rather
  * than duplicating the address book here.
+ *
+ * ONLY HTS TOKENS CAN BE ASSOCIATED
+ *
+ * Bonzo's aTokens are ERC20 contracts deployed through the EVM, not HTS tokens. Including one fails
+ * the whole transaction with HTS response code 167, INVALID_TOKEN_ID — and it is unnecessary, since
+ * ERC20 balances need no association. The plan therefore only offers the underlyings.
+ *
+ * WHY THE OUTCOME IS VERIFIED RATHER THAN THE EXIT CODE
+ *
+ * `cast send` returns zero for a transaction that was accepted and then reverted on chain. An
+ * earlier version of this script printed a tick for exactly that: two of three calls reverted with
+ * INVALID_TOKEN_ID while the run reported success. Association state is therefore read back from the
+ * mirror node at the end, which is the only claim worth making.
  */
 
 import { execFileSync } from "child_process";
 
-const RPC_URLS = {
-  hedera_testnet: "https://testnet.hashio.io/api",
-  hedera_mainnet: "https://mainnet.hashio.io/api",
+const NETWORKS = {
+  hedera_testnet: {
+    rpcUrl: "https://testnet.hashio.io/api",
+    mirrorNode: "https://testnet.mirrornode.hedera.com",
+  },
+  hedera_mainnet: {
+    rpcUrl: "https://mainnet.hashio.io/api",
+    mirrorNode: "https://mainnet.mirrornode.hedera.com",
+  },
 };
 
-/**
- * Hedera charges per HTS association and estimation through the relay is not dependable for them,
- * so an explicit ceiling is passed. Roughly 900k per token with headroom; unused gas is not charged.
- */
-const GAS_PER_ASSOCIATION = 900_000;
+/** Roughly measured at ~950k per association on testnet; unused gas is not charged. */
+const GAS_PER_ASSOCIATION = 1_200_000;
+
+/** Mirror node ingestion lags consensus by a second or two. */
+const VERIFY_ATTEMPTS = 10;
+const VERIFY_DELAY_MS = 3_000;
 
 function parseArgs(argv) {
   let network = "hedera_testnet";
   let keystore = null;
-
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--network" && argv[i + 1]) network = argv[++i];
     else if (argv[i] === "--keystore" && argv[i + 1]) keystore = argv[++i];
@@ -80,7 +99,7 @@ function readPlan(rpcUrl) {
     if (match) plan[match[1]] = match[2].split(",").filter(Boolean);
   }
 
-  if (!plan.underlyings || !plan.all) {
+  if (!plan.associable?.length) {
     console.error("\n❌ Could not read the association plan. Raw output:\n");
     console.error(output);
     process.exit(1);
@@ -88,9 +107,8 @@ function readPlan(rpcUrl) {
   return plan;
 }
 
-function associate(label, contract, tokens, { rpcUrl, keystore }) {
+function send(label, contract, tokens, { rpcUrl, keystore }) {
   console.log(`\n🔗 ${label} → ${tokens.length} token(s)`);
-  tokens.forEach((t) => console.log(`     ${t}`));
 
   const args = [
     "send",
@@ -109,57 +127,130 @@ function associate(label, contract, tokens, { rpcUrl, keystore }) {
     // stdio inherited so cast can prompt for the keystore password on a real TTY.
     execFileSync("cast", args, { stdio: "inherit" });
   } catch {
-    // execFileSync throws with a full Node stack trace that buries the actual cause. cast has
-    // already printed whatever went wrong to the inherited stderr, so say what failed and stop.
+    // cast has already printed the cause to the inherited stderr; a Node stack trace would bury it.
     console.error(
-      `\n❌ Associating ${label} failed. cast printed the reason above.`
+      `\n⚠️  Sending for ${label} failed. Continuing so the rest are attempted;`
     );
-    console.error("   Common causes:");
-    console.error("     • wrong keystore password, or no TTY to prompt on");
+    console.error("   the verification step below reports the real state.");
+  }
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Maps each token's EVM address to its Hedera id, which is what association state is keyed by. */
+async function resolveTokenIds(mirrorNode, tokens) {
+  const ids = new Map();
+  for (const token of tokens) {
+    const response = await fetch(`${mirrorNode}/api/v1/tokens/${token}`);
+    if (!response.ok) {
+      console.error(
+        `\n❌ ${token} is not an HTS token — it cannot be associated.`
+      );
+      console.error(
+        "   Bonzo aTokens are ERC20 contracts and must not appear in the plan.\n"
+      );
+      process.exit(1);
+    }
+    const body = await response.json();
+    ids.set(token.toLowerCase(), body.token_id);
+  }
+  return ids;
+}
+
+async function verify(mirrorNode, targets, tokenIds) {
+  const expected = [...tokenIds.values()];
+  console.log(
+    `\n🔍 Verifying association state on the mirror node (expecting ${expected.join(
+      ", "
+    )})`
+  );
+
+  for (let attempt = 1; attempt <= VERIFY_ATTEMPTS; attempt++) {
+    const results = [];
+
+    for (const { label, address } of targets) {
+      const response = await fetch(
+        `${mirrorNode}/api/v1/accounts/${address}/tokens?limit=50`
+      );
+      const body = response.ok ? await response.json() : { tokens: [] };
+      const held = new Set((body.tokens ?? []).map((t) => t.token_id));
+      results.push({ label, missing: expected.filter((id) => !held.has(id)) });
+    }
+
+    if (results.every((r) => r.missing.length === 0)) {
+      results.forEach((r) =>
+        console.log(`   ✔ ${r.label} — all ${expected.length} associated`)
+      );
+      console.log(
+        "\n✅ Done. The agent treasury still needs its own associations — that is your account.\n"
+      );
+      return;
+    }
+
+    if (attempt < VERIFY_ATTEMPTS) {
+      await sleep(VERIFY_DELAY_MS);
+      continue;
+    }
+
+    console.error("\n❌ Association did not complete:");
+    for (const { label, missing } of results) {
+      console.error(
+        missing.length === 0
+          ? `   ✔ ${label}`
+          : `   ✘ ${label} — missing ${missing.join(", ")}`
+      );
+    }
     console.error(
-      "     • the deployer is not the owner of that contract — associate is onlyOwner"
+      "\n   Association is idempotent, so re-running is safe. Check that the deployer owns"
     );
-    console.error("     • gas limit too low for this many associations");
     console.error(
-      "\n   Association is idempotent, so re-running after a fix is safe.\n"
+      "   each contract — associate is onlyOwner — and that the gas limit was sufficient.\n"
     );
     process.exit(1);
   }
-  console.log(`   ✔ ${label} associated`);
 }
 
-function main() {
+async function main() {
   const { network, keystore } = parseArgs(process.argv.slice(2));
-  const rpcUrl = RPC_URLS[network];
+  const config = NETWORKS[network];
 
-  if (!rpcUrl) {
+  if (!config) {
     console.error(
       `\n❌ Unknown network '${network}'. Use hedera_testnet or hedera_mainnet.\n`
     );
     process.exit(1);
   }
 
-  const router = requireEnv("ACTION_ROUTER");
-  const saucerSwapAdapter = requireEnv("SAUCERSWAP_ADAPTER");
-  const bonzoAdapter = requireEnv("BONZO_ADAPTER");
+  const targets = [
+    { label: "ActionRouter", address: requireEnv("ACTION_ROUTER") },
+    { label: "SaucerSwapAdapter", address: requireEnv("SAUCERSWAP_ADAPTER") },
+    { label: "BonzoAdapter", address: requireEnv("BONZO_ADAPTER") },
+  ];
 
-  console.log(
-    `\n📋 Reading the association plan from HelperConfig and Bonzo on ${network}…`
-  );
-  const plan = readPlan(rpcUrl);
+  console.log(`\n📋 Reading the association plan on ${network}…`);
+  const plan = readPlan(config.rpcUrl);
+  console.log(`   associable (HTS): ${plan.associable.join(", ")}`);
+  if (plan.erc20_atokens_not_associable) {
+    console.log(
+      `   skipped (ERC20 aTokens, not HTS): ${plan.erc20_atokens_not_associable.join(
+        ", "
+      )}`
+    );
+  }
 
-  const options = { rpcUrl, keystore };
+  const tokenIds = await resolveTokenIds(config.mirrorNode, plan.associable);
 
-  // The router custodies both legs of every action, so it needs everything.
-  associate("ActionRouter", router, plan.all, options);
-  // The swap adapter only ever receives the input; output goes straight to the router.
-  associate("SaucerSwapAdapter", saucerSwapAdapter, plan.underlyings, options);
-  // Bonzo hands the adapter underlyings on supply and aTokens to burn on withdraw.
-  associate("BonzoAdapter", bonzoAdapter, plan.all, options);
+  // Every contract handles the same underlyings: the router custodies both legs, the swap adapter
+  // receives the input, and the Bonzo adapter receives underlyings on supply and repay. aTokens are
+  // ERC20 and need nothing.
+  for (const { label, address } of targets) {
+    send(label, address, plan.associable, { rpcUrl: config.rpcUrl, keystore });
+  }
 
-  console.log(
-    "\n✅ Done. The agent treasury still needs its own associations — that is your account.\n"
-  );
+  await verify(config.mirrorNode, targets, tokenIds);
 }
 
-main();
+main().catch((error) => {
+  console.error(`\n❌ ${error.message}\n`);
+  process.exit(1);
+});

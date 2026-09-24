@@ -27,6 +27,13 @@ import { IBonzoDataProvider } from "../contracts/interfaces/IBonzoLendingPool.so
  *
  * Output is deliberately machine-readable — `PLAN <label> <csv>` — so the runner parses it rather
  * than duplicating the address book in JavaScript.
+ *
+ * **Only the underlyings are associable.** Bonzo's aTokens are ordinary ERC20 contracts deployed
+ * through the EVM, not HTS tokens: `0xf594C3d2…` resolves as contract `0.0.4999408` on the mirror
+ * node and is rejected by `/api/v1/tokens/`. Associating one fails with HTS response code 167,
+ * `INVALID_TOKEN_ID`, and takes the whole transaction with it. Nor is it needed — ERC20 balances
+ * require no association. The aToken list is still printed, because knowing which addresses are
+ * *not* HTS is worth having, but nothing should try to associate them.
  */
 contract PrintAssociationPlan is Script {
     function run() external {
@@ -44,24 +51,14 @@ contract PrintAssociationPlan is Script {
             aTokens[i] = aToken;
         }
 
-        console2.log(string.concat("PLAN underlyings ", _csv(underlyings)));
-        console2.log(string.concat("PLAN atokens ", _csv(aTokens)));
-        console2.log(string.concat("PLAN all ", _csv(_concat(underlyings, aTokens))));
+        // `associable` is what the runner acts on. The aTokens are reported for visibility only.
+        console2.log(string.concat("PLAN associable ", _csv(underlyings)));
+        console2.log(string.concat("PLAN erc20_atokens_not_associable ", _csv(aTokens)));
     }
 
     function _csv(address[] memory addresses) private pure returns (string memory csv) {
         for (uint256 i = 0; i < addresses.length; i++) {
             csv = i == 0 ? vm.toString(addresses[i]) : string.concat(csv, ",", vm.toString(addresses[i]));
-        }
-    }
-
-    function _concat(address[] memory a, address[] memory b) private pure returns (address[] memory joined) {
-        joined = new address[](a.length + b.length);
-        for (uint256 i = 0; i < a.length; i++) {
-            joined[i] = a[i];
-        }
-        for (uint256 i = 0; i < b.length; i++) {
-            joined[a.length + i] = b[i];
         }
     }
 }
