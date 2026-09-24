@@ -102,6 +102,29 @@ Two corollaries that have each cost time in this repo:
 This bites well beyond direct token calls. Quoting a SaucerSwap swap reads the pool's HTS balances,
 so even a read-only price query needs the emulator under fork.
 
+**It bites forge *scripts* too, and the fix there is different.** `forge script` simulates locally
+before broadcasting, and that simulation has no `0x167` either — so a script calling
+`associateToken` dies with the same `InvalidFEOpcode` *before a single transaction is sent*:
+
+```
+0x167::associateToken(...) ← [InvalidFEOpcode] EvmError: InvalidFEOpcode
+Error: script failed: <empty revert data>
+```
+
+`htsSetup()` is the wrong tool here; it is a test cheatcode, and etching state into a broadcast run
+is not what you want. Skip the simulation instead:
+
+```bash
+yarn foundry:deploy --file AssociateTokens.s.sol --network hedera_testnet \
+  --keystore hedera-testnet --skip-simulation
+```
+
+`--skip-simulation` is wired through `scripts-js/parseArgs.js` → `SKIP_SIMULATION` → the Makefile's
+`SKIP_SIM_FLAG`. Gas is still estimated over RPC against the real network, where `0x167` exists.
+
+Use it for any script touching HTS — association, HTS mint, HTS create. `DeployAgentOps` does not
+need it, because deploying and wiring never reaches the system contract.
+
 ### Mirror node topic queries need a bounded window, max 7 days
 
 Filtering contract logs by `topic0` without a timestamp range returns **HTTP 400**:

@@ -56,8 +56,11 @@ yarn foundry:account                 # confirm the balance (deploy costs ~23 HBA
 yarn foundry:deploy --file DeployAgentOps.s.sol --network hedera_testnet --keystore hedera-testnet
 
 # associate the deployed contracts with the tokens they will handle
+# --skip-simulation is required: this script calls the HTS system contract, which the
+# local simulation does not have. See Caveats.
 ACTION_ROUTER=0x... SAUCERSWAP_ADAPTER=0x... BONZO_ADAPTER=0x... \
-  yarn foundry:deploy --file AssociateTokens.s.sol --network hedera_testnet --keystore hedera-testnet
+  yarn foundry:deploy --file AssociateTokens.s.sol --network hedera_testnet \
+    --keystore hedera-testnet --skip-simulation
 
 yarn next:dev                        # http://localhost:3000
 ```
@@ -155,6 +158,12 @@ which does not exist in a plain `forge test --fork-url` run. The call lands on e
 with `InvalidFEOpcode`, which looks like a compiler bug and is not. Use `htsSetup()` from
 `hedera-forking` — and note the import is `hedera-forking/htsSetup.sol`, not the path in that
 library's own README, because `remappings.txt` already points at `contracts/`.
+
+**`forge script` simulates before broadcasting, and that simulation has no `0x167` either.** A
+script calling `associateToken` dies with `InvalidFEOpcode` before sending anything. `htsSetup()` is
+the wrong fix — it is a test cheatcode. Pass `--skip-simulation` instead; gas is still estimated over
+RPC against the real network, where the system contract exists. Needed for any script touching HTS;
+not needed for `DeployAgentOps`, which never reaches it.
 
 **`cast call` succeeding tells you nothing about a fork.** The live network has `0x167`; a fork does
 not. A read that works from the command line can consume the whole gas limit under `forge test`. A

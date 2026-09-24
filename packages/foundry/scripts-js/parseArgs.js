@@ -14,6 +14,9 @@ const args = process.argv.slice(2);
 let fileName = "Deploy.s.sol";
 let network = "localhost";
 let keystoreArg = null;
+// Scripts that call the HTS system contract at 0x167 cannot be simulated locally -- see the
+// --skip-simulation note in the help text below.
+let skipSimulation = false;
 
 // Show help message if --help is provided
 if (args.includes("--help") || args.includes("-h")) {
@@ -23,6 +26,11 @@ Options:
   --file <filename>     Specify the deployment script file (default: Deploy.s.sol)
   --network <network>   Specify the network (default: localhost)
   --keystore <name>     Specify the keystore account to use (bypasses selection prompt)
+  --skip-simulation     Broadcast without simulating first. Required for scripts that call the
+                        HTS system contract at 0x167 (token association, HTS mint/create):
+                        that contract is Hedera-native and does not exist in the local EVM
+                        forge simulates against, so simulation dies with InvalidFEOpcode
+                        before any transaction is sent.
   --help, -h           Show this help message
 Examples:
   yarn deploy --file DeployHederaToken.s.sol --network hedera_testnet
@@ -44,6 +52,8 @@ for (let i = 0; i < args.length; i++) {
   } else if (args[i] === "--keystore" && args[i + 1]) {
     keystoreArg = args[i + 1];
     i++; // Skip next arg since we used it
+  } else if (args[i] === "--skip-simulation") {
+    skipSimulation = true;
   }
 }
 
@@ -152,6 +162,7 @@ The default account (scaffold-hbar-default) can only be used for localhost deplo
 process.env.DEPLOY_SCRIPT = `script/${fileName}`;
 process.env.RPC_URL = network;
 process.env.ETH_KEYSTORE_ACCOUNT = selectedKeystore;
+process.env.SKIP_SIMULATION = skipSimulation ? "1" : "";
 
 // Run make from the foundry package root so it finds the Makefile and forge uses foundry.toml
 const foundryPackageRoot = join(__dirname, "..");
