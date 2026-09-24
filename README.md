@@ -55,12 +55,11 @@ yarn foundry:account                 # confirm the balance (deploy costs ~23 HBA
 # deploy and wire the system
 yarn foundry:deploy --file DeployAgentOps.s.sol --network hedera_testnet --keystore hedera-testnet
 
-# associate the deployed contracts with the tokens they will handle
-# --skip-simulation is required: this script calls the HTS system contract, which the
-# local simulation does not have. See Caveats.
+# associate the deployed contracts with the tokens they will handle.
+# Not a forge script -- association calls the HTS system contract, which forge cannot
+# execute locally. See Caveats.
 ACTION_ROUTER=0x... SAUCERSWAP_ADAPTER=0x... BONZO_ADAPTER=0x... \
-  yarn foundry:deploy --file AssociateTokens.s.sol --network hedera_testnet \
-    --keystore hedera-testnet --skip-simulation
+  yarn foundry:associate --network hedera_testnet --keystore hedera-testnet
 
 yarn next:dev                        # http://localhost:3000
 ```
@@ -136,6 +135,7 @@ Verification goes through Sourcify, which supports Hedera on the main instance.
 ## Useful commands
 
 ```bash
+yarn foundry:associate            # associate deployed contracts with HTS tokens
 yarn foundry:test                 # hermetic unit tests; fork tests self-skip
 yarn foundry:test:testnet         # fork against Hedera testnet (296)
 yarn foundry:test:mainnet         # fork against Hedera mainnet (295)
@@ -159,11 +159,14 @@ with `InvalidFEOpcode`, which looks like a compiler bug and is not. Use `htsSetu
 `hedera-forking` — and note the import is `hedera-forking/htsSetup.sol`, not the path in that
 library's own README, because `remappings.txt` already points at `contracts/`.
 
-**`forge script` simulates before broadcasting, and that simulation has no `0x167` either.** A
-script calling `associateToken` dies with `InvalidFEOpcode` before sending anything. `htsSetup()` is
-the wrong fix — it is a test cheatcode. Pass `--skip-simulation` instead; gas is still estimated over
-RPC against the real network, where the system contract exists. Needed for any script touching HTS;
-not needed for `DeployAgentOps`, which never reaches it.
+**`forge script` cannot call `0x167` at all.** forge always executes a script's body locally to
+discover which transactions to broadcast, so a script calling `associateToken` dies with
+`InvalidFEOpcode` before anything is sent. `--skip-simulation` does not help — it skips the on-chain
+simulation, not the local execution; the failure is identical with no broadcast flag at all. Use
+`cast send`, which signs and submits without executing locally: `yarn foundry:associate` does this,
+resolving addresses through a read-only forge script so `HelperConfig` stays the only address book.
+Applies to any script touching HTS; `DeployAgentOps` is unaffected because it never reaches the
+system contract.
 
 **`cast call` succeeding tells you nothing about a fork.** The live network has `0x167`; a fork does
 not. A read that works from the command line can consume the whole gas limit under `forge test`. A

@@ -102,28 +102,33 @@ Two corollaries that have each cost time in this repo:
 This bites well beyond direct token calls. Quoting a SaucerSwap swap reads the pool's HTS balances,
 so even a read-only price query needs the emulator under fork.
 
-**It bites forge *scripts* too, and the fix there is different.** `forge script` simulates locally
-before broadcasting, and that simulation has no `0x167` either — so a script calling
-`associateToken` dies with the same `InvalidFEOpcode` *before a single transaction is sent*:
+**`forge script` cannot call `0x167` at all.** This is the sharpest edge here. forge always
+executes a script's body locally to discover which transactions to broadcast, so a script calling
+`associateToken` dies with `InvalidFEOpcode` before anything is sent:
 
 ```
 0x167::associateToken(...) ← [InvalidFEOpcode] EvmError: InvalidFEOpcode
 Error: script failed: <empty revert data>
 ```
 
-`htsSetup()` is the wrong tool here; it is a test cheatcode, and etching state into a broadcast run
-is not what you want. Skip the simulation instead:
+**`--skip-simulation` does not fix this.** It skips the *on-chain* simulation, not the local
+execution that finds the transactions. Verified: the script fails identically with no broadcast flag
+at all. `htsSetup()` is also wrong — it is a test cheatcode, and etching an emulator into a run that
+is about to broadcast real transactions is not the intent.
+
+Use `cast send`, which signs and submits without executing locally:
 
 ```bash
-yarn foundry:deploy --file AssociateTokens.s.sol --network hedera_testnet \
-  --keystore hedera-testnet --skip-simulation
+ACTION_ROUTER=0x… SAUCERSWAP_ADAPTER=0x… BONZO_ADAPTER=0x… \
+  yarn foundry:associate --network hedera_testnet --keystore hedera-testnet
 ```
 
-`--skip-simulation` is wired through `scripts-js/parseArgs.js` → `SKIP_SIMULATION` → the Makefile's
-`SKIP_SIM_FLAG`. Gas is still estimated over RPC against the real network, where `0x167` exists.
+`scripts-js/associateTokens.js` does that. Address resolution stays in Solidity —
+`PrintAssociationPlan.s.sol` is read-only, which forge handles fine, and it keeps `HelperConfig` the
+single place any protocol address is written rather than duplicating the address book in JavaScript.
 
-Use it for any script touching HTS — association, HTS mint, HTS create. `DeployAgentOps` does not
-need it, because deploying and wiring never reaches the system contract.
+The same applies to any script touching HTS: association, HTS mint, HTS create. `DeployAgentOps` is
+unaffected, because deploying and wiring never reach the system contract.
 
 ### Mirror node topic queries need a bounded window, max 7 days
 
@@ -215,7 +220,8 @@ usage text and exit non-zero. That flag is eslint-only and belongs on `next:lint
 | `packages/nextjs/components/agent/` | Audit feed component; pages at `app/agents/` | built |
 | `packages/foundry/contracts/HtsAssociatable.sol` | Shared HTS association for router + adapters | built |
 | `packages/foundry/script/DeployAgentOps.s.sol` | Deploys and wires the whole system | built |
-| `packages/foundry/script/AssociateTokens.s.sol` | Associates deployed contracts with HTS tokens | built |
+| `packages/foundry/script/PrintAssociationPlan.s.sol` | Read-only: which tokens each contract needs | built |
+| `packages/foundry/scripts-js/associateTokens.js` | Sends the associations via `cast send` | built |
 | `template.json` | Scaffold manifest — **required by the bounty gate** | built |
 
 Keep the Status column honest. An agent that trusts a "built" row and finds nothing wastes a cycle.

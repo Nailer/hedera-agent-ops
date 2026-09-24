@@ -18,12 +18,6 @@ setup-deployer:
 	cast wallet import --private-key 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6 --unsafe-password 'localhost' scaffold-hbar-default
 
 # Deploy the contracts
-# Scripts that call the HTS system contract at 0x167 -- token association, HTS mint/create -- cannot
-# be simulated. That contract is Hedera-native and absent from the local EVM forge simulates
-# against, so simulation dies with InvalidFEOpcode before a single transaction is broadcast.
-# `yarn foundry:deploy --skip-simulation ...` sets SKIP_SIMULATION=1, which becomes this flag.
-SKIP_SIM_FLAG := $(if $(SKIP_SIMULATION),--skip-simulation,)
-
 deploy:
 	@if [ ! -f "$(DEPLOY_SCRIPT)" ]; then \
 		echo "Error: Deploy script '$(DEPLOY_SCRIPT)' not found"; \
@@ -39,9 +33,9 @@ deploy:
 			forge script $(DEPLOY_SCRIPT) --rpc-url localhost --account $(ETH_KEYSTORE_ACCOUNT) --broadcast --ffi; \
 		fi \
 	elif [ "$(RPC_URL)" = "hedera_testnet" ]; then \
-		forge script $(DEPLOY_SCRIPT) --rpc-url https://testnet.hashio.io/api --account $(ETH_KEYSTORE_ACCOUNT) --broadcast --ffi --slow --legacy $(SKIP_SIM_FLAG); \
+		forge script $(DEPLOY_SCRIPT) --rpc-url https://testnet.hashio.io/api --account $(ETH_KEYSTORE_ACCOUNT) --broadcast --ffi --slow --legacy; \
 	elif [ "$(RPC_URL)" = "hedera_mainnet" ]; then \
-		forge script $(DEPLOY_SCRIPT) --rpc-url https://mainnet.hashio.io/api --account $(ETH_KEYSTORE_ACCOUNT) --broadcast --ffi --slow --legacy $(SKIP_SIM_FLAG); \
+		forge script $(DEPLOY_SCRIPT) --rpc-url https://mainnet.hashio.io/api --account $(ETH_KEYSTORE_ACCOUNT) --broadcast --ffi --slow --legacy; \
 	else \
 		forge script $(DEPLOY_SCRIPT) --rpc-url $(RPC_URL) --account $(ETH_KEYSTORE_ACCOUNT) --broadcast --ffi --slow; \
 	fi
