@@ -6,6 +6,12 @@
       "runtimeExecutable": "yarn",
       "runtimeArgs": ["next:dev"],
       "port": 3000
+    },
+    {
+      "name": "hedera-agent-ops-prod",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["next:serve"],
+      "port": 3000
     }
   ]
 }

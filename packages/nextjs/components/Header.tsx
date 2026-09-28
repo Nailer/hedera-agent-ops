@@ -73,7 +73,10 @@ export const Header = () => {
 
   return (
     <div className="sticky lg:static top-0 navbar bg-base-100 min-h-0 shrink-0 justify-between z-20 shadow-sm border-b border-base-300 px-0 sm:px-2">
-      <div className="navbar-start w-auto lg:w-1/2">
+      {/* `lg:w-auto` rather than the scaffold's `lg:w-1/2`: this template adds a fourth nav link,
+          and a half-width start section overflows without clipping, painting the links over the
+          balance and connect button on the right. Sizing to content lets flex split it properly. */}
+      <div className="navbar-start w-auto lg:w-auto min-w-0">
         <details className="dropdown" ref={burgerMenuRef}>
           <summary className="ml-1 btn btn-ghost lg:hidden hover:bg-transparent">
             <Bars3Icon className="h-1/2" />
