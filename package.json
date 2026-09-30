@@ -41,7 +41,8 @@
     "precommit": "lint-staged",
     "lint-staged": "lint-staged",
     "next:test": "yarn workspace @sh/nextjs test",
-    "foundry:associate": "yarn workspace @sh/foundry associate"
+    "foundry:associate": "yarn workspace @sh/foundry associate",
+    "foundry:demo": "yarn workspace @sh/foundry demo"
   },
   "packageManager": "yarn@3.2.3",
   "devDependencies": {
