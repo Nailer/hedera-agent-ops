@@ -5,7 +5,6 @@ import { Test } from "forge-std/Test.sol";
 import { Vm } from "forge-std/Vm.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ActionRouter } from "../contracts/ActionRouter.sol";
 import { AgentRegistry } from "../contracts/AgentRegistry.sol";
 import { IAgentAction } from "../contracts/interfaces/IAgentAction.sol";
