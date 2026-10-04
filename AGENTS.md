@@ -292,8 +292,11 @@ WalletConnect).
 
 ### UI
 
-Use `@scaffold-hbar-ui/components` for web3 UI: `Address`, `AddressInput`, `Balance`, `EtherInput`,
-`IntegerInput`. Prefer DaisyUI classes over raw Tailwind where a DaisyUI component exists.
+Use `@scaffold-hbar-ui/components` for web3 UI. The exports are `Address`, `HederaAddress`, `Balance`,
+`HederaAddressInput`, `HbarInput`, `BaseInput`, `HederaPortalFaucet` and `hederaPortalFaucetUrl` —
+there is no `AddressInput`, `EtherInput` or `IntegerInput`, which is what the upstream scaffold
+briefing claims. `HederaAddressInput` accepts `0.0.n` or `0x…` and can report the resolved EVM
+address through `onResolvedEvmChange`. Prefer DaisyUI classes over raw Tailwind where a DaisyUI component exists.
 
 ## Style
 

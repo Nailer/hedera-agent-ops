@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { NextPage } from "next";
 import { AuditFeed } from "~~/components/agent/AuditFeed";
+import { RegisterAgentForm } from "~~/components/agent/RegisterAgentForm";
 import { useDeployedContractInfo, useScaffoldReadContract, useTargetNetwork } from "~~/hooks/scaffold-hbar";
 import { useAgentAuditTrail } from "~~/hooks/useAgentAuditTrail";
 import { hashscanAddressUrl, networkForChainId } from "~~/services/audit/format";
@@ -49,16 +50,15 @@ const AgentsPage: NextPage = () => {
         )}
       </header>
 
+      <RegisterAgentForm />
+
       <section className="flex flex-col gap-3">
         <h2 className="text-xl font-semibold">
           Registered {count > 0 && <span className="badge badge-neutral align-middle">{count}</span>}
         </h2>
 
         {count === 0 ? (
-          <div className="text-sm opacity-70">
-            No agents registered yet. Call <code className="text-xs">registerAgent</code> on the registry — the Debug
-            Contracts page is the quickest way.
-          </div>
+          <div className="text-sm opacity-70">No agents registered yet. Use the form above.</div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {agentIds.map(id => (

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { NextPage } from "next";
+import { ActionConsole } from "~~/components/agent/ActionConsole";
 import { AuditFeed } from "~~/components/agent/AuditFeed";
 import { useDeployedContractInfo, useScaffoldReadContract, useTargetNetwork } from "~~/hooks/scaffold-hbar";
 import { useAgentAuditTrail } from "~~/hooks/useAgentAuditTrail";
@@ -99,6 +100,12 @@ const AgentDetailPage: NextPage = () => {
           ))}
         </section>
       )}
+
+      <ActionConsole
+        agentId={agentId ?? 0n}
+        controller={agent?.controller as string | undefined}
+        operator={agent?.operator as string | undefined}
+      />
 
       <section className="flex flex-col gap-3">
         <div className="flex items-baseline gap-3">
