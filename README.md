@@ -67,6 +67,30 @@ yarn next:dev                        # http://localhost:3000
 Addresses for the association step are printed by the deploy and written to
 `packages/foundry/deployments/296.json`.
 
+## Live on Hedera testnet
+
+This template is deployed and wired on testnet (chain 296). The contracts below are the ones the
+tests and the frontend talk to, and the wiring was verified by reading it back off chain rather than
+trusting the deploy output.
+
+| Contract | Address |
+| --- | --- |
+| `AgentRegistry` | [`0x2bcD5637Fc34eCC488EBA4bA209DACad05Cf0D76`](https://hashscan.io/testnet/contract/0x2bcD5637Fc34eCC488EBA4bA209DACad05Cf0D76) |
+| `ActionRouter` | [`0x50F1aE91073ADD5dc4f833C95ce8230872cE4F88`](https://hashscan.io/testnet/contract/0x50F1aE91073ADD5dc4f833C95ce8230872cE4F88) |
+| `SaucerSwapAdapter` | [`0x34DC78d33a76e5Ac6c5546c6241f903c66FCa506`](https://hashscan.io/testnet/contract/0x34DC78d33a76e5Ac6c5546c6241f903c66FCa506) |
+| `BonzoAdapter` | [`0x5b89b6BA0bb905f97Bb0Da0F827E20D930f5abC0`](https://hashscan.io/testnet/contract/0x5b89b6BA0bb905f97Bb0Da0F827E20D930f5abC0) |
+
+Deployed in 7 transactions for 8.35 HBAR. All three contracts are associated with the HTS tokens
+they handle — WHBAR `0.0.15058`, SAUCE `0.0.1183558`, USDC `0.0.5449` — which is required before a
+Hedera contract can hold a token at all.
+
+To check the wiring yourself:
+
+```bash
+cast call 0x50F1aE91073ADD5dc4f833C95ce8230872cE4F88 "registry()(address)" \
+  --rpc-url https://testnet.hashio.io/api
+```
+
 ## How it works
 
 ```text
