@@ -29,7 +29,13 @@ import { pad } from "viem";
  * may not be queryable here yet, so anything that submits an action and reads it back must poll.
  */
 
-export const DEFAULT_MIRROR_NODE_URL = "https://testnet.mirrornode.hedera.com";
+/**
+ * Mirror node REST base. Overridable so the same reader works against mainnet, a local mirror node,
+ * or a caching proxy — the audit trail is only verifiable by a third party if they can point it at
+ * their own node rather than one we chose for them.
+ */
+export const DEFAULT_MIRROR_NODE_URL =
+  process.env.NEXT_PUBLIC_MIRROR_NODE_URL || "https://testnet.mirrornode.hedera.com";
 
 /** The mirror node's hard ceiling on a topic-filtered timestamp range. */
 export const MAX_TOPIC_WINDOW_SECONDS = 7 * 24 * 60 * 60;

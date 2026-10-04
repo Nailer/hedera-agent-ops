@@ -6,7 +6,7 @@ Claude Code loads it through `CLAUDE.md`.
 ## Overview
 
 An on-chain agent registry where registered agents execute real DeFi actions through Hedera
-protocols, and every action is written to an HCS topic and replayed from the mirror node as a
+protocols, and every action emits a receipt that is replayed from the mirror node as a
 tamper-evident audit trail.
 
 The registry answers *"does this agent exist?"*. The audit trail answers *"what has it actually
@@ -33,7 +33,7 @@ Agent (registered)
   → ActionRouter
       → IAgentAction adapter ─┬─ SaucerSwapAdapter → SaucerSwap V2 SwapRouter
                               └─ BonzoAdapter      → Bonzo LendingPool
-  → receipt → HCS topic → mirror node → audit feed in the UI
+  → ActionExecuted receipt → mirror node contract logs → audit feed in the UI
 ```
 
 ### Critical invariants
@@ -50,8 +50,13 @@ These are the rules the contracts must obey. Breaking one is a bug even if tests
   the router is the boundary. A policy that only exists in React is not a policy.
 - **Every state-changing agent action emits a receipt event, unconditionally.** The audit trail is
   only tamper-evident if it cannot be selectively skipped. No early return may bypass the emit.
-- **The HCS topic is append-only and never the source of truth for balances.** It records what was
-  attempted and what the chain returned. Read balances from chain state, not from the log.
+- **The receipt log is append-only and never the source of truth for balances.** It records what
+  was attempted and what the chain returned. Read balances from chain state, not from the log.
+- **Receipts are contract events, not HCS messages, and that is deliberate.** Writing to an HCS
+  topic would need an off-chain submitter, and a trail an operator can decline to write is not a
+  trail. An event emitted in the same transaction as the transfer cannot be omitted without
+  reverting the action itself. If you add an HCS mirror of the log, it is a convenience layer on
+  top — never the record consumers are told to trust.
 - **Mirror node reads are eventually consistent.** Never assert a just-submitted transaction is
   visible on the mirror node without polling. A read-after-write that passes locally will flake.
 
