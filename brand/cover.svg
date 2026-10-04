@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="500" viewBox="0 0 1500 500">
+  <!--
+    X / Twitter header, 1500x500.
+
+    Layout accounts for how X actually crops this: the avatar overlaps the lower left, and on narrow
+    viewports the top and bottom are shaved. So the text block sits left-of-centre but above the
+    avatar's reach, and nothing load-bearing goes within 90px of any edge.
+  -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#11151d"/>
+      <stop offset="60%" stop-color="#141a27"/>
+      <stop offset="100%" stop-color="#1a1430"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8259ef"/>
+      <stop offset="100%" stop-color="#2d84eb"/>
+    </linearGradient>
+    <linearGradient id="core" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9b7bf5"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8259ef" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#8259ef" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1500" height="500" fill="url(#bg)"/>
+  <circle cx="1230" cy="250" r="340" fill="url(#glow)"/>
+
+  <!-- The mark, large and quiet, anchored right. Same construction as the avatar: broken arcs that
+       follow the circumference (a record), an unbroken boundary, an agent at the centre. -->
+  <g transform="translate(1210,250)">
+    <circle cx="0" cy="0" r="158" fill="none" stroke="url(#ring)" stroke-width="17"
+            stroke-linecap="round" stroke-dasharray="198 38 100 32 46 32 125 430"
+            transform="rotate(-128)"/>
+    <circle cx="0" cy="0" r="122" fill="none" stroke="url(#ring)" stroke-width="12"
+            stroke-linecap="round" opacity="0.55"
+            stroke-dasharray="72 30 156 36 42 436" transform="rotate(24)"/>
+    <circle cx="0" cy="0" r="83" fill="none" stroke="#8259ef" stroke-width="3.5" opacity="0.45"/>
+    <circle cx="0" cy="0" r="56" fill="url(#core)"/>
+  </g>
+
+  <g font-family="'Helvetica Neue',Helvetica,Arial,sans-serif">
+    <text x="110" y="152" fill="#ffffff" font-size="68" font-weight="700" letter-spacing="-1.5">
+      Hedera Agent Ops
+    </text>
+    <text x="113" y="208" fill="#b9a9f7" font-size="27" font-weight="500" letter-spacing="0.2">
+      Autonomous agents, on a leash you can verify.
+    </text>
+
+    <g fill="#9b9b9d" font-size="21" font-weight="400">
+      <text x="113" y="272">Spend limits enforced on-chain · every action receipted · read it back</text>
+      <text x="113" y="304">from the Hedera mirror node. A Scaffold-HBAR template.</text>
+    </g>
+
+    <g font-size="19" font-weight="600" letter-spacing="0.6">
+      <text x="113" y="362" fill="#8259ef">SAUCERSWAP</text>
+      <text x="283" y="362" fill="#3f4654">·</text>
+      <text x="305" y="362" fill="#8259ef">BONZO</text>
+      <text x="400" y="362" fill="#3f4654">·</text>
+      <text x="422" y="362" fill="#8259ef">HTS</text>
+      <text x="481" y="362" fill="#3f4654">·</text>
+      <text x="503" y="362" fill="#8259ef">MIRROR NODE</text>
+    </g>
+  </g>
+</svg>

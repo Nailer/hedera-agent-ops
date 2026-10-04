@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <!--
+    Hedera Agent Ops mark.
+
+    An agent (solid centre) wrapped in its own record. The outer rings are broken arcs that follow
+    the circumference — uneven runs and gaps, like entries written to a ledger over time. An earlier
+    version used radial spokes and read unmistakably as a sun; strokes that radiate from a centre dot
+    always will. Following the circumference instead is what makes it read as a record.
+
+    The unbroken inner ring is the boundary the agent acts inside: the spend policy, enforced on
+    chain. Solid, where the record is intermittent.
+
+    400x400 for an X avatar, which crops to a circle, so nothing sits outside the inscribed circle.
+  -->
+  <defs>
+    <linearGradient id="arcA" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8259ef"/>
+      <stop offset="100%" stop-color="#2d84eb"/>
+    </linearGradient>
+    <linearGradient id="arcB" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#8259ef"/>
+    </linearGradient>
+    <linearGradient id="core" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a98df7"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8259ef" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#8259ef" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="400" height="400" fill="#11151d"/>
+  <circle cx="200" cy="200" r="160" fill="url(#glow)"/>
+
+  <!-- Outer record: long runs and short ones, with real gaps. Rotated so the densest run sits top-right. -->
+  <circle cx="200" cy="200" r="152" fill="none" stroke="url(#arcA)" stroke-width="18"
+          stroke-linecap="round" stroke-dasharray="190 36 96 30 44 30 120 414"
+          transform="rotate(-128 200 200)"/>
+
+  <!-- Inner record, offset: a second pass of entries, quieter. -->
+  <circle cx="200" cy="200" r="118" fill="none" stroke="url(#arcB)" stroke-width="13"
+          stroke-linecap="round" opacity="0.62"
+          stroke-dasharray="70 28 150 34 40 420"
+          transform="rotate(24 200 200)"/>
+
+  <!-- The boundary: unbroken, because the limit does not have gaps. -->
+  <circle cx="200" cy="200" r="80" fill="none" stroke="#8259ef" stroke-width="4" opacity="0.5"/>
+
+  <!-- The agent. -->
+  <circle cx="200" cy="200" r="54" fill="url(#core)"/>
+</svg>
