@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Hedera Agent Ops — demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #11151d; --panel: #1a2030; --line: #2b3550; --text: #eef1f8; --dim: #9aa5c0;
+    --uv: #8259ef; --violet: #4f46e5; --cobalt: #2d84eb; --ok: #3ddc97; --warn: #ffcf66; --bad: #ff6b81;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--text);
+    font-family: Inter, system-ui, sans-serif; }
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  #stage { position: relative; width: 1920px; height: 1080px;
+    background: radial-gradient(1200px 700px at 78% -10%, #2a2262 0%, transparent 60%),
+                radial-gradient(900px 600px at 0% 110%, #16345f 0%, transparent 60%), var(--bg); }
+  .scene { position: absolute; inset: 0; padding: 90px 120px; opacity: 0; display: flex; flex-direction: column; }
+  .kicker { font-size: 26px; letter-spacing: .18em; text-transform: uppercase; color: var(--uv); font-weight: 700; }
+  h1 { font-size: 92px; font-weight: 800; letter-spacing: -.02em; line-height: 1.04; }
+  h2 { font-size: 66px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; margin-top: 14px; }
+  .sub { font-size: 34px; color: var(--dim); line-height: 1.45; margin-top: 26px; max-width: 1400px; }
+  .grad { background: linear-gradient(90deg, var(--uv), var(--cobalt)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .box { background: var(--panel); border: 2px solid var(--line); border-radius: 22px; padding: 26px 30px; }
+  .abs { position: absolute; }
+  .center { align-items: center; justify-content: center; text-align: center; }
+  .chip { display: inline-block; padding: 8px 18px; border-radius: 999px; font-size: 24px; font-weight: 600; border: 2px solid var(--line); color: var(--dim); }
+  .tag { font-size: 22px; color: var(--dim); }
+  .row { display: flex; gap: 36px; }
+  #progress { position: absolute; left: 0; bottom: 0; height: 6px; background: linear-gradient(90deg, var(--uv), var(--cobalt)); width: 0; }
+  #caption { position: absolute; left: 0; right: 0; bottom: 38px; text-align: center; font-size: 30px; color: var(--dim); }
+  .frame { border-radius: 18px; overflow: hidden; border: 2px solid var(--line); box-shadow: 0 30px 80px rgba(0,0,0,.55); background: #fff; }
+  .frame img { display: block; width: 100%; }
+  .callout { position: absolute; background: var(--uv); color: #fff; font-weight: 700; font-size: 28px; padding: 12px 22px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .step { display: flex; align-items: center; gap: 22px; font-size: 38px; font-weight: 600; }
+  .num { width: 56px; height: 56px; border-radius: 50%; background: var(--uv); display: grid; place-items: center; font-size: 30px; font-weight: 800; flex: none; }
+  .field { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 27px; }
+  .field:last-child { border: 0; }
+  .field b { color: var(--cobalt); font-weight: 500; }
+  svg { overflow: visible; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- 1 TITLE -->
+  <section class="scene center" id="s-title">
+    <img id="t-logo" src="assets/logo.png" width="300" height="300" style="border-radius: 60px" />
+    <h1 id="t-h" style="margin-top: 30px">Hedera <span class="grad">Agent Ops</span></h1>
+    <p id="t-p" class="sub" style="max-width: 1300px">Autonomous agents that act on real DeFi — and can’t hide what they did.</p>
+    <div id="t-c" style="margin-top: 40px; display: flex; gap: 16px"><span class="chip">SaucerSwap</span><span class="chip">Bonzo</span><span class="chip">Hedera mirror node</span></div>
+  </section>
+
+  <!-- 2 PROBLEM -->
+  <section class="scene" id="s-problem" style="justify-content: center">
+    <div class="kicker" id="p-k">The problem</div>
+    <h2 id="p-h1" style="font-size: 84px">A registry answers</h2>
+    <h2 id="p-q1" class="grad" style="font-size: 84px; margin-top: 0">“does this agent exist?”</h2>
+    <h2 id="p-h2" style="font-size: 84px; margin-top: 54px">It can’t answer</h2>
+    <h2 id="p-q2" style="font-size: 84px; margin-top: 0; color: var(--warn)">“what has it actually done?”</h2>
+  </section>
+
+  <!-- 3 ARCHITECTURE -->
+  <section class="scene" id="s-arch">
+    <div class="kicker">Architecture</div>
+    <h2>Consumers depend on one interface</h2>
+    <svg class="abs" width="1920" height="1080" style="left:0; top:0">
+      <g stroke="#4f5f8f" stroke-width="3" fill="none" id="a-lines">
+        <path id="l1" d="M 470 600 H 600" /><path id="l2" d="M 920 600 H 1010" />
+        <path id="l3" d="M 1330 560 L 1470 470" /><path id="l4" d="M 1330 640 L 1470 730" />
+        <path id="l5" d="M 760 540 V 400" />
+      </g>
+    </svg>
+    <div class="box abs" id="a-agent" style="left:120px; top:530px; width:350px; height:140px"><div style="font-size:36px;font-weight:700">Agent</div><div class="tag">registered · operator key</div></div>
+    <div class="box abs" id="a-router" style="left:600px; top:510px; width:320px; height:180px; border-color:var(--uv)"><div style="font-size:36px;font-weight:700">ActionRouter</div><div class="tag">authorise → execute → measure → receipt</div></div>
+    <div class="box abs" id="a-reg" style="left:600px; top:290px; width:320px; height:110px"><div style="font-size:32px;font-weight:700">AgentRegistry</div><div class="tag">identity · spend policy</div></div>
+    <div class="box abs" id="a-iface" style="left:1010px; top:530px; width:320px; height:140px; border-color:var(--cobalt)"><div class="mono" style="font-size:34px;font-weight:600;color:var(--cobalt)">IAgentAction</div><div class="tag">the only thing the router knows</div></div>
+    <div class="box abs" id="a-ss" style="left:1470px; top:390px; width:330px; height:160px"><div style="font-size:29px;font-weight:700">SaucerSwapAdapter</div><div class="tag">swap · V2 exactInput</div></div>
+    <div class="box abs" id="a-bz" style="left:1470px; top:650px; width:330px; height:160px"><div style="font-size:29px;font-weight:700">BonzoAdapter</div><div class="tag">supply · withdraw · repay</div></div>
+    <div class="box abs" id="a-new" style="left:1010px; top:760px; width:320px; height:100px; border-style:dashed"><div style="font-size:28px;color:var(--dim)">+ your next protocol</div></div>
+  </section>
+
+  <!-- 4 ROLES -->
+  <section class="scene" id="s-roles">
+    <div class="kicker">Three roles, deliberately separate</div>
+    <h2>A leaked key can’t raise its own limit</h2>
+    <div class="row" style="margin-top: 70px">
+      <div class="box" id="r1" style="flex:1; padding: 40px"><div style="font-size:30px;color:var(--uv);font-weight:700">CONTROLLER</div><div style="font-size:42px;font-weight:700;margin:12px 0">Sets policy</div><div class="sub" style="font-size:28px;margin:0">Authorises tokens, per-action and per-epoch caps. Can rotate the operator.</div></div>
+      <div class="box" id="r2" style="flex:1; padding: 40px"><div style="font-size:30px;color:var(--cobalt);font-weight:700">OPERATOR</div><div style="font-size:42px;font-weight:700;margin:12px 0">Submits actions</div><div class="sub" style="font-size:28px;margin:0">The hot key. Can act inside the budget — and nothing else.</div></div>
+      <div class="box" id="r3" style="flex:1; padding: 40px"><div style="font-size:30px;color:var(--ok);font-weight:700">TREASURY</div><div style="font-size:42px;font-weight:700;margin:12px 0">Holds the funds</div><div class="sub" style="font-size:28px;margin:0">Keeps custody. The router holds funds only inside a single transaction.</div></div>
+    </div>
+    <div class="box" id="r-err" style="margin-top: 60px; border-color: var(--bad); display:flex; align-items:center; gap:28px">
+      <span style="font-size:30px;color:var(--bad);font-weight:700">COMPROMISED OPERATOR →</span>
+      <span class="mono" style="font-size:30px">AgentRegistry__ExceedsPerAction</span>
+      <span class="tag" style="font-size:26px">reverts on-chain, before any token moves</span>
+    </div>
+  </section>
+
+  <!-- 5 REGISTER (real UI) -->
+  <section class="scene" id="s-register">
+    <div class="kicker">The app · live</div>
+    <h2>The frontend writes, not just reads</h2>
+    <div class="frame abs" id="reg-frame" style="left:120px; top:290px; width:1080px; height:470px"><img src="assets/app-register.png" style="width:1620px; margin-left:-405px; margin-top:-40px" /></div>
+    <div class="abs" style="left:1300px; top:300px; width:520px; display:flex; flex-direction:column; gap:36px">
+      <div class="step" id="st1"><span class="num">1</span>Register an agent</div>
+      <div class="step" id="st2"><span class="num">2</span>Set a spend policy</div>
+      <div class="step" id="st3"><span class="num">3</span>Approve the router</div>
+      <div class="step" id="st4"><span class="num">4</span>Execute a swap</div>
+      <div class="step" id="st5"><span class="num" style="background:var(--ok);color:#06281a">5</span>Read the receipt</div>
+    </div>
+    <div class="callout" id="reg-c" style="left:420px; top:720px">Registration grants zero spending power</div>
+  </section>
+
+  <!-- 6 RECEIPT -->
+  <section class="scene" id="s-receipt">
+    <div class="kicker">One action</div>
+    <h2>Measured, then recorded — unconditionally</h2>
+    <div class="abs" style="left:120px; top:300px; width:760px; display:flex; flex-direction:column; gap:30px">
+      <div class="step" id="rs1"><span class="num">1</span>Authorise against policy</div>
+      <div class="step" id="rs2"><span class="num">2</span>Pull funds for this one call</div>
+      <div class="step" id="rs3"><span class="num">3</span>Adapter swaps or supplies</div>
+      <div class="step" id="rs4"><span class="num">4</span>Measure the real balance delta</div>
+      <div class="step" id="rs5"><span class="num" style="background:var(--ok);color:#06281a">5</span>Emit the receipt</div>
+      <div class="tag" id="rs-note" style="font-size:26px; margin-top:10px; max-width:700px">The adapter’s own <span class="mono">amountOut</span> is ignored for accounting. A buggy or hostile adapter can’t corrupt the record.</div>
+    </div>
+    <div class="box abs mono" id="rc-card" style="left:1010px; top:290px; width:790px; padding: 30px 36px; border-color: var(--ok)">
+      <div style="font-size:30px;font-weight:700;color:var(--ok);margin-bottom:12px" class="">event ActionExecuted</div>
+      <div class="tag" style="margin-bottom:10px;font-family:Inter">Event fields — structure shown, not a real transaction</div>
+      <div class="field"><span>agentId</span><b>indexed</b></div>
+      <div class="field"><span>protocolId</span><b>indexed</b></div>
+      <div class="field"><span>kind</span><b>indexed</b></div>
+      <div class="field"><span>operator</span><b>address</b></div>
+      <div class="field"><span>assetIn · amountIn</span><b>what was spent</b></div>
+      <div class="field"><span>assetOut · amountOut</span><b style="color:var(--ok)">measured, not claimed</b></div>
+      <div class="field"><span>protocolRef</span><b>bytes32</b></div>
+      <div class="field"><span>sequence</span><b>append-only</b></div>
+    </div>
+  </section>
+
+  <!-- 7 AUDIT -->
+  <section class="scene" id="s-audit">
+    <div class="kicker">Tamper-evident audit trail</div>
+    <h2>Why events, not HCS messages</h2>
+    <div class="row" style="margin-top: 60px">
+      <div class="box" id="au1" style="flex:1; border-color:var(--bad)"><div style="font-size:32px;font-weight:700;color:var(--bad)">Off-chain submitter</div><div class="sub" style="font-size:28px">An operator can simply decline to write the record.</div></div>
+      <div class="box" id="au2" style="flex:1; border-color:var(--ok)"><div style="font-size:32px;font-weight:700;color:var(--ok)">Event in the same transaction</div><div class="sub" style="font-size:28px">Omitting it means reverting the action itself.</div></div>
+    </div>
+    <div id="au-win" style="margin-top: 70px">
+      <div class="tag" style="font-size:28px">Mirror node replay — non-overlapping 7-day windows, newest first</div>
+      <div class="row" style="gap:14px; margin-top:22px">
+        <div class="box mono" id="w1" style="flex:1;padding:22px;text-align:center;font-size:26px">now → −7d</div>
+        <div class="box mono" id="w2" style="flex:1;padding:22px;text-align:center;font-size:26px">−7d → −14d</div>
+        <div class="box mono" id="w3" style="flex:1;padding:22px;text-align:center;font-size:26px">−14d → −21d</div>
+        <div class="box mono" id="w4" style="flex:1;padding:22px;text-align:center;font-size:26px">…</div>
+      </div>
+    </div>
+    <div class="tag abs" id="au-env" style="left:120px; bottom:120px; font-size:28px">Point <span class="mono" style="color:var(--cobalt)">NEXT_PUBLIC_MIRROR_NODE_URL</span> at your own node to verify independently.</div>
+  </section>
+
+  <!-- 8 LIVE -->
+  <section class="scene" id="s-live">
+    <div class="kicker">Live on Hedera testnet · chain 296</div>
+    <h2>Deployed, wired, source-verified</h2>
+    <div class="frame abs" id="hs-frame" style="left:120px; top:280px; width:1000px; height:560px"><img src="assets/hashscan-registry.png" style="width:1000px" /></div>
+    <div class="abs mono" style="left:1170px; top:290px; width:640px; display:flex; flex-direction:column; gap:26px">
+      <div class="box" id="ad1" style="padding:18px 24px"><div style="font-size:26px;font-weight:700;font-family:Inter">AgentRegistry</div><div style="font-size:19px;color:var(--cobalt)">0x2bcD5637…05Cf0D76</div></div>
+      <div class="box" id="ad2" style="padding:18px 24px"><div style="font-size:26px;font-weight:700;font-family:Inter">ActionRouter</div><div style="font-size:19px;color:var(--cobalt)">0x50F1aE91…30872cE4F88</div></div>
+      <div class="box" id="ad3" style="padding:18px 24px"><div style="font-size:26px;font-weight:700;font-family:Inter">SaucerSwapAdapter</div><div style="font-size:19px;color:var(--cobalt)">0x34DC78d3…c66FCa506</div></div>
+      <div class="box" id="ad4" style="padding:18px 24px"><div style="font-size:26px;font-weight:700;font-family:Inter">BonzoAdapter</div><div style="font-size:19px;color:var(--cobalt)">0x5b89b6BA…0f5abC0</div></div>
+    </div>
+    <div class="callout" id="hs-c" style="left:500px; top:790px; background:var(--ok); color:#06281a">VERIFIED · Full Match on Sourcify</div>
+  </section>
+
+  <!-- 9 CLOSE -->
+  <section class="scene center" id="s-close">
+    <img id="c-logo" src="assets/logo.png" width="200" height="200" style="border-radius: 40px" />
+    <h1 id="c-h" style="margin-top: 24px; font-size: 80px">Agents that act under <span class="grad">limits the chain enforces</span></h1>
+    <p id="c-p" class="sub">…with a record the chain keeps.</p>
+    <div id="c-r" class="mono" style="margin-top: 44px; font-size: 30px; color: var(--cobalt)">github.com/Nailer/hedera-agent-ops</div>
+  </section>
+
+  <div id="caption"></div>
+  <div id="progress"></div>
+</div>
+
+<script>
+  // Timeline is injected by build.mjs: [{ id, start, end }] in seconds, plus window.TOTAL.
+  const T = window.TIMELINE || [];
+  const anims = [];
+  const $ = (id) => document.getElementById(id);
+
+  // Register a paused animation on the global timeline; seek() drives them all deterministically.
+  function at(el, start, dur, from, to, easing = "cubic-bezier(.2,.7,.2,1)") {
+    const a = el.animate([from, to], { duration: dur * 1000, delay: start * 1000, fill: "both", easing });
+    a.pause();
+    anims.push(a);
+  }
+  const rise = (el, s, d = 0.7) => at(el, s, d, { opacity: 0, transform: "translateY(36px)" }, { opacity: 1, transform: "none" });
+  const fade = (el, s, d = 0.6) => at(el, s, d, { opacity: 0 }, { opacity: 1 });
+  const pop = (el, s, d = 0.5) => at(el, s, d, { opacity: 0, transform: "scale(.85)" }, { opacity: 1, transform: "none" });
+  const draw = (path, s, d = 0.7) => {
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = len;
+    at(path, s, d, { strokeDashoffset: len }, { strokeDashoffset: 0 });
+  };
+
+  const sc = Object.fromEntries(T.map((s) => [s.id, s]));
+  const dur = (id) => sc[id].end - sc[id].start;
+  // Scene visibility: fade in over 0.5s, fade out over 0.5s.
+  T.forEach((s) => {
+    const el = $("s-" + s.id);
+    const d = s.end - s.start;
+    const a = el.animate(
+      [{ opacity: 0 }, { opacity: 1, offset: 0.5 / d }, { opacity: 1, offset: 1 - 0.5 / d }, { opacity: 0 }],
+      { duration: d * 1000, delay: s.start * 1000, fill: "both" }
+    );
+    a.pause();
+    anims.push(a);
+  });
+
+  // Scene-specific choreography, all in absolute seconds.
+  (function build() {
+    const s = (id) => sc[id].start;
+
+    // title
+    pop($("t-logo"), s("title") + 0.2, 0.9); rise($("t-h"), s("title") + 0.9); rise($("t-p"), s("title") + 1.6); fade($("t-c"), s("title") + 2.4);
+
+    // problem
+    rise($("p-k"), s("problem") + 0.3);
+    rise($("p-h1"), s("problem") + 0.8); rise($("p-q1"), s("problem") + 1.6);
+    rise($("p-h2"), s("problem") + 5.4); rise($("p-q2"), s("problem") + 6.4);
+
+    // architecture
+    const A = s("arch");
+    pop($("a-agent"), A + 1.0); draw($("l1"), A + 2.2, 0.5); pop($("a-router"), A + 2.6);
+    pop($("a-reg"), A + 4.2); draw($("l5"), A + 4.7, 0.5);
+    draw($("l2"), A + 7.0, 0.5); pop($("a-iface"), A + 7.4);
+    draw($("l3"), A + 9.0, 0.5); pop($("a-ss"), A + 9.4);
+    draw($("l4"), A + 11.0, 0.5); pop($("a-bz"), A + 11.4);
+    fade($("a-new"), Math.min(A + 14.2, sc.arch.end - 3), 0.8);
+
+    // roles
+    const R = s("roles");
+    rise($("r1"), R + 1.5); rise($("r2"), R + 4.0); rise($("r3"), R + 6.5);
+    pop($("r-err"), R + 11.5, 0.6);
+
+    // register
+    const G = s("register");
+    rise($("reg-frame"), G + 0.8, 0.9);
+    ["st1", "st2", "st3", "st4", "st5"].forEach((id, i) => rise($(id), G + 2.2 + i * 1.5, 0.5));
+    pop($("reg-c"), G + 9.5);
+
+    // receipt
+    const C = s("receipt");
+    ["rs1", "rs2", "rs3", "rs4", "rs5"].forEach((id, i) => rise($(id), C + 1.2 + i * 2.4, 0.5));
+    fade($("rs-note"), C + 10.5);
+    pop($("rc-card"), C + 12.0, 0.8);
+
+    // audit
+    const U = s("audit");
+    rise($("au1"), U + 1.5); rise($("au2"), U + 3.5);
+    ["w1", "w2", "w4"].forEach((id, i) => pop($(id), U + 8.0 + i * 0.7, 0.4));
+    pop($("w3"), U + 8.7, 0.4);
+    fade($("au-env"), U + 12.5);
+
+    // live
+    const L = s("live");
+    rise($("hs-frame"), L + 0.8, 0.9);
+    ["ad1", "ad2", "ad3", "ad4"].forEach((id, i) => rise($(id), L + 2.5 + i * 1.3, 0.5));
+    pop($("hs-c"), L + 7.5);
+
+    // close
+    pop($("c-logo"), s("close") + 0.3); rise($("c-h"), s("close") + 0.9); rise($("c-p"), s("close") + 2.2); fade($("c-r"), s("close") + 3.2);
+  })();
+
+  window.seek = function (t) {
+    anims.forEach((a) => (a.currentTime = t * 1000));
+    $("progress").style.width = (t / (window.TOTAL || 1)) * 100 + "%";
+  };
+  window.ready = document.fonts.ready.then(() => Promise.all([...document.images].map((i) => i.decode().catch(() => {}))));
+  window.seek(0);
+</script>
+</body>
+</html>
